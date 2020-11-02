@@ -1,0 +1,16 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+      - run: npm install
+      - run: npm run publish -- -p $VSCODE_MARKETPLACE_TOKEN
+        env:
+          VSCODE_MARKETPLACE_TOKEN: ${{secrets.VSCODE_MARKETPLACE_TOKEN}}

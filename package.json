@@ -1,0 +1,102 @@
+{
+  "name": "phpstan",
+  "displayName": "PHPStan",
+  "description": "PHPStan for VSCode",
+  "version": "1.0.0",
+  "license": "MIT",
+  "publisher": "swordev",
+  "author": "Juanra Gálvez <juanrgm724@gmail.com>",
+  "icon": "assets/logo.png",
+  "engines": {
+    "vscode": "^1.50.0"
+  },
+  "categories": [
+    "Linters",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "php",
+    "phpstan",
+    "linter",
+    "problems",
+    "errors",
+    "analyse"
+  ],
+  "activationEvents": [
+    "workspaceContains:**/phpstan.neon",
+    "workspaceContains:**/phpstan.neon.dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/swordev/phpstan-vscode.git"
+  },
+  "bugs": {
+    "url": "https://github.com/swordev/phpstan-vscode/issues"
+  },
+  "main": "./lib/extension.js",
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "PHPStan",
+      "properties": {
+        "phpstan.enabled": {
+          "type": "boolean",
+          "description": "Enables PHPStan",
+          "default": true
+        },
+        "phpstan.path": {
+          "type": "string",
+          "description": "PHPStan binary path",
+          "default": "./vendor/phpstan/phpstan/phpstan"
+        },
+        "phpstan.phpPath": {
+          "type": "string",
+          "description": "PHP binary path",
+          "default": "php"
+        },
+        "phpstan.memoryLimit": {
+          "type": "string",
+          "description": "PHP memory limit",
+          "default": "-1"
+        },
+        "phpstan.fileWatcher": {
+          "type": "boolean",
+          "description": "Enables file watcher",
+          "default": true
+        },
+        "phpstan.fileWatcherPattern": {
+          "type": "string",
+          "description": "File watcher glob pattern",
+          "default": "**/*.{php}"
+        },
+        "phpstan.analysedDelay": {
+          "type": "integer",
+          "description": "Milliseconds delay between file changes before run analyse",
+          "default": 200
+        }
+      }
+    }
+  },
+  "scripts": {
+    "publish": "vsce publish",
+    "vscode:prepublish": "npm run prepare",
+    "build": "rimraf lib/* && tsc -p ./src/tsconfig.json",
+    "dev": "tsc -p ./src/tsconfig.json -w",
+    "lint": "eslint . --ext .ts,.js,.json",
+    "lint:fix": "eslint . --ext .ts,.js,.json --fix",
+    "prepare": "npm run build && npm run lint"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.6",
+    "@types/vscode": "^1.50.0",
+    "@typescript-eslint/eslint-plugin": "^4.6.0",
+    "@typescript-eslint/parser": "^4.6.0",
+    "eslint": "^7.12.1",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "prettier": "2.1.2",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.0.5",
+    "vsce": "^1.81.1"
+  }
+}
