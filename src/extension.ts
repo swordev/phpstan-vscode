@@ -75,6 +75,14 @@ function getConfigValue<T extends keyof Settings>(
 	return config.get(name) as Settings[T]
 }
 
+function setAnalysingStatusBar(progress?: number) {
+	let text = "$(sync~spin) PHPStan analysing..."
+	if (progress > 0) text += ` (${progress}%)`
+	statusBarItem.text = text
+	statusBarItem.tooltip = ""
+	statusBarItem.show()
+}
+
 async function phpstanAnalyseDelayed(ms?: number) {
 	const config = vscode.workspace.getConfiguration(EXT_NAME)
 	clearTimeout(currentProcessTimeout)
@@ -95,9 +103,7 @@ async function phpstanAnalyse() {
 	const phpStanPath = getConfigValue(config, "path")
 	const memoryLimit = getConfigValue(config, "memoryLimit")
 
-	statusBarItem.text = "PHPStan analysing..."
-	statusBarItem.tooltip = ""
-	statusBarItem.show()
+	setAnalysingStatusBar()
 
 	try {
 		const args = ["-f", phpStanPath, "analyse"]
@@ -112,9 +118,11 @@ async function phpstanAnalyse() {
 			outputChannel.appendLine(data.toString())
 		)
 
-		childProcess.stderr.on("data", (data: Buffer) =>
+		childProcess.stderr.on("data", (data: Buffer) => {
+			const progress = /(\d{1,3})%\s*$/.exec(data.toString())?.[1]
+			if (progress) setAnalysingStatusBar(Number(progress))
 			outputChannel.appendLine(data.toString())
-		)
+		})
 
 		const [, stdout] = await waitForClose(childProcess)
 
