@@ -108,6 +108,14 @@ async function phpstanAnalyse() {
 			cwd: vscode.workspace.rootPath,
 		}))
 
+		childProcess.stdout.on("data", (data: Buffer) =>
+			outputChannel.appendLine(data.toString())
+		)
+
+		childProcess.stderr.on("data", (data: Buffer) =>
+			outputChannel.appendLine(data.toString())
+		)
+
 		const [, stdout] = await waitForClose(childProcess)
 
 		if (currentProcessKilled) {
@@ -161,11 +169,7 @@ async function refreshDiagnostics(result: PhpstanResult) {
 async function waitForClose(childProcess: ChildProcessWithoutNullStreams) {
 	return new Promise<[number, string]>((resolve, reject) => {
 		let result = ""
-		childProcess.stdout.on("data", (data) => {
-			result += data + "\n"
-			outputChannel.appendLine(data)
-		})
-		childProcess.stderr.on("data", (data) => outputChannel.appendLine(data))
+		childProcess.stdout.on("data", (data) => (result += data + "\n"))
 		childProcess.on("error", reject)
 		childProcess.on("close", (exitCode) => resolve([exitCode, result]))
 	})
