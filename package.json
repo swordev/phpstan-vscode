@@ -89,7 +89,6 @@
   },
   "scripts": {
     "publish": "vsce publish",
-    "vscode:prepublish": "npm run prepare",
     "build": "rimraf lib/* && tsc -p ./src/tsconfig.json",
     "dev": "tsc -p ./src/tsconfig.json -w",
     "lint": "eslint . --ext .ts,.js,.json",
