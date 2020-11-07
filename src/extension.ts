@@ -71,7 +71,8 @@ export function activate(context: vscode.ExtensionContext): void {
 				`{${settings.configFileWatcherBasenames.join(",")}}`
 			)
 		)
-		configFileWatcher.onDidChange(async () => {
+		configFileWatcher.onDidChange(async (uri) => {
+			outputChannel.appendLine(`# Config file changed: ${uri.fsPath}`)
 			await init()
 		})
 		init()
@@ -105,7 +106,10 @@ function createFileWatcher() {
 	const watcher = vscode.workspace.createFileSystemWatcher(
 		settings.fileWatcherPattern
 	)
-	watcher.onDidChange(async () => phpstanAnalyseDelayed())
+	watcher.onDidChange(async (uri) => {
+		outputChannel.appendLine(`# File changed: ${uri.fsPath}`)
+		phpstanAnalyseDelayed()
+	})
 	return watcher
 }
 
