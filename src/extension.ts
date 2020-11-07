@@ -125,18 +125,18 @@ async function phpstanAnalyseDelayed(ms?: number) {
 }
 
 async function phpstanAnalyse() {
-	const phpPath = settings.phpPath
-	const phpStanPath = settings.path
-	const memoryLimit = settings.memoryLimit
-
 	setAnalysingStatusBar()
 
 	try {
-		const args = ["-f", phpStanPath, "analyse"]
-			.concat(memoryLimit ? ["--memory-limit=" + memoryLimit] : [])
+		const args = ["-f", settings.path, "analyse"]
+			.concat(
+				settings.memoryLimit
+					? ["--memory-limit=" + settings.memoryLimit]
+					: []
+			)
 			.concat(["--error-format=json"])
 
-		const childProcess = (currentProcess = spawn(phpPath, args, {
+		const childProcess = (currentProcess = spawn(settings.phpPath, args, {
 			cwd: vscode.workspace.rootPath,
 		}))
 
