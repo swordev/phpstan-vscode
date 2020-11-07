@@ -1,25 +1,7 @@
 import * as vscode from "vscode"
 import { ChildProcessWithoutNullStreams, spawn } from "child_process"
 import { waitForClose } from "./util"
-
-type PhpstanResult = {
-	totals: {
-		errors: number
-		file_errors: number
-	}
-	files: {
-		[path: string]: {
-			errors: number
-			messages: {
-				message: string
-				line: number
-				ignorable: boolean
-			}[]
-		}
-	}
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	errors: any[]
-}
+import { PHPStan, ResultType } from "./PHPStan"
 
 type SettingsType = {
 	enabled: boolean
@@ -175,7 +157,7 @@ async function phpstanAnalyse() {
 			return
 		}
 
-		const phpstanResult = parsePhpstanStdout(stdout)
+		const phpstanResult = PHPStan.parseResult(stdout)
 
 		refreshDiagnostics(phpstanResult)
 	} catch (error) {
@@ -189,11 +171,7 @@ async function phpstanAnalyse() {
 	statusBarItem.hide()
 }
 
-function parsePhpstanStdout(stdout: string): PhpstanResult {
-	return JSON.parse(stdout)
-}
-
-async function refreshDiagnostics(result: PhpstanResult) {
+async function refreshDiagnostics(result: ResultType) {
 	diagnosticCollection.clear()
 
 	for (const path in result.files) {
