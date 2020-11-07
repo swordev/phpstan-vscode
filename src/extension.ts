@@ -37,7 +37,7 @@ let settingsListener: vscode.Disposable
 let diagnosticCollection: vscode.DiagnosticCollection
 let outputChannel: vscode.OutputChannel
 let statusBarItem: vscode.StatusBarItem
-let watcher: vscode.FileSystemWatcher
+let fileWatcher: vscode.FileSystemWatcher
 let settings: SettingsType
 
 let currentProcessTimeout: NodeJS.Timeout
@@ -61,14 +61,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	diagnosticCollection = vscode.languages.createDiagnosticCollection(EXT_NAME)
 	statusBarItem = vscode.window.createStatusBarItem()
 
-	if (settings.fileWatcher) {
-		watcher = vscode.workspace.createFileSystemWatcher(
-			settings.fileWatcherPattern
-		)
-		watcher.onDidChange(async () => phpstanAnalyseDelayed())
-	}
-
-	phpstanAnalyseDelayed(0)
+	init()
 }
 
 function getSettings(): SettingsType {
@@ -86,12 +79,26 @@ function getSettings(): SettingsType {
 	}
 }
 
+async function init() {
+	fileWatcher?.dispose()
+	if (settings.fileWatcher) fileWatcher = createFileWatcher()
+	phpstanAnalyseDelayed(0)
+}
+
+function createFileWatcher() {
+	const watcher = vscode.workspace.createFileSystemWatcher(
+		settings.fileWatcherPattern
+	)
+	watcher.onDidChange(async () => phpstanAnalyseDelayed())
+	return watcher
+}
+
 export function deactivate(): void {
 	settingsListener?.dispose()
 	diagnosticCollection.dispose()
 	outputChannel.dispose()
 	statusBarItem.dispose()
-	watcher?.dispose()
+	fileWatcher?.dispose()
 }
 
 function setAnalysingStatusBar(progress?: number) {
