@@ -7,6 +7,7 @@
 - Activates the extension if it detects `phpstan.neon`/`phpstan.neon.dist` file on project root dir.
 - Runs PHPStan analyse on every PHP file change.
 - Shows all PHPStan problems of whole project.
+- Parses PHPStan config for file watching.
 
 ## Requirements
 
