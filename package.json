@@ -63,11 +63,6 @@
           "description": "Enables file watcher",
           "default": true
         },
-        "phpstan.fileWatcherPattern": {
-          "type": "string",
-          "description": "File watcher glob pattern",
-          "default": "**/*.{php}"
-        },
         "phpstan.configFileWatcher": {
           "type": "boolean",
           "description": "Enables config file watcher",
@@ -113,5 +108,8 @@
     "rimraf": "^3.0.2",
     "typescript": "^4.0.5",
     "vsce": "^1.81.1"
+  },
+  "dependencies": {
+    "yaml": "^1.10.0"
   }
 }

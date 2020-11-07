@@ -1,7 +1,7 @@
 import * as vscode from "vscode"
 import { ChildProcessWithoutNullStreams, spawn } from "child_process"
 import { waitForClose } from "./util"
-import { PHPStan, ResultType } from "./PHPStan"
+import { PHPStan, ConfigType, ResultType } from "./PHPStan"
 
 type SettingsType = {
 	enabled: boolean
@@ -10,7 +10,6 @@ type SettingsType = {
 	fileWatcher: boolean
 	configFileWatcher: boolean
 	configFileWatcherBasenames: string[]
-	fileWatcherPattern: string
 	analysedDelay: number
 	memoryLimit: string
 }
@@ -23,13 +22,13 @@ let outputChannel: vscode.OutputChannel
 let statusBarItem: vscode.StatusBarItem
 let configFileWatcher: vscode.FileSystemWatcher
 let fileWatcher: vscode.FileSystemWatcher
-let settings: SettingsType
-
 let currentProcessTimeout: NodeJS.Timeout
 let currentProcess: ChildProcessWithoutNullStreams | null
 let currentProcessKilled: boolean | null
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+let config: ConfigType = null
+let settings: SettingsType = null
+
 export function activate(context: vscode.ExtensionContext): void {
 	settings = getSettings()
 
@@ -41,6 +40,12 @@ export function activate(context: vscode.ExtensionContext): void {
 	})
 
 	if (!settings.enabled) return
+
+	PHPStan.settings = {
+		basenames: settings.configFileWatcherBasenames,
+		path: settings.path,
+		rootPath: vscode.workspace.rootPath,
+	}
 
 	outputChannel = vscode.window.createOutputChannel(EXT_NAME)
 	diagnosticCollection = vscode.languages.createDiagnosticCollection(EXT_NAME)
@@ -70,7 +75,6 @@ function getSettings(): SettingsType {
 		path: get("path"),
 		phpPath: get("phpPath"),
 		fileWatcher: get("fileWatcher"),
-		fileWatcherPattern: get("fileWatcherPattern"),
 		configFileWatcher: get("configFileWatcher"),
 		configFileWatcherBasenames: get("configFileWatcherBasenames"),
 		analysedDelay: get("analysedDelay"),
@@ -80,18 +84,28 @@ function getSettings(): SettingsType {
 
 async function init() {
 	fileWatcher?.dispose()
-	if (settings.fileWatcher) fileWatcher = createFileWatcher()
-	phpstanAnalyseDelayed(0)
+	config = await PHPStan.parseConfig()
+	outputChannel.appendLine(`# Config:\n${JSON.stringify(config, null, 2)}`)
+	if (config) {
+		if (settings.fileWatcher) fileWatcher = createFileWatcher()
+		phpstanAnalyseDelayed(0)
+	}
 }
 
 function createFileWatcher() {
 	const watcher = vscode.workspace.createFileSystemWatcher(
-		settings.fileWatcherPattern
+		`**/*.{${config.parameters.fileExtensions.join(",")}}`
 	)
+
 	watcher.onDidChange(async (uri) => {
-		outputChannel.appendLine(`# File changed: ${uri.fsPath}`)
-		phpstanAnalyseDelayed()
+		for (const path of config.parameters.paths) {
+			if (uri.fsPath.startsWith(path)) {
+				outputChannel.appendLine(`# File changed: ${uri.fsPath}`)
+				return await phpstanAnalyseDelayed()
+			}
+		}
 	})
+
 	return watcher
 }
 
