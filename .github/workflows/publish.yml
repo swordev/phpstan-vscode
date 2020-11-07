@@ -10,7 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
-      - run: npm install
+      - run: npm ci
+      - run: npm i -g vsce
       - run: npm prune --production
       - run: npm run publish -- -p $VSCODE_MARKETPLACE_TOKEN
         env:
