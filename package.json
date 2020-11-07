@@ -93,7 +93,7 @@
     "dev": "tsc -p ./src/tsconfig.json -w",
     "lint": "eslint . --ext .ts,.js,.json",
     "lint:fix": "eslint . --ext .ts,.js,.json --fix",
-    "prepare": "npm run build && npm run lint"
+    "prepare": "npm run build && npm run lint && vsce package"
   },
   "devDependencies": {
     "@types/node": "^14.14.6",
