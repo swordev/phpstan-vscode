@@ -26,6 +26,8 @@ type SettingsType = {
 	path: string
 	phpPath: string
 	fileWatcher: boolean
+	configFileWatcher: boolean
+	configFileWatcherBasenames: string[]
 	fileWatcherPattern: string
 	analysedDelay: number
 	memoryLimit: string
@@ -37,6 +39,7 @@ let settingsListener: vscode.Disposable
 let diagnosticCollection: vscode.DiagnosticCollection
 let outputChannel: vscode.OutputChannel
 let statusBarItem: vscode.StatusBarItem
+let configFileWatcher: vscode.FileSystemWatcher
 let fileWatcher: vscode.FileSystemWatcher
 let settings: SettingsType
 
@@ -61,7 +64,18 @@ export function activate(context: vscode.ExtensionContext): void {
 	diagnosticCollection = vscode.languages.createDiagnosticCollection(EXT_NAME)
 	statusBarItem = vscode.window.createStatusBarItem()
 
-	init()
+	if (settings.configFileWatcher) {
+		configFileWatcher = vscode.workspace.createFileSystemWatcher(
+			new vscode.RelativePattern(
+				vscode.workspace.rootPath,
+				`{${settings.configFileWatcherBasenames.join(",")}}`
+			)
+		)
+		configFileWatcher.onDidChange(async () => {
+			await init()
+		})
+		init()
+	}
 }
 
 function getSettings(): SettingsType {
@@ -74,6 +88,8 @@ function getSettings(): SettingsType {
 		phpPath: get("phpPath"),
 		fileWatcher: get("fileWatcher"),
 		fileWatcherPattern: get("fileWatcherPattern"),
+		configFileWatcher: get("configFileWatcher"),
+		configFileWatcherBasenames: get("configFileWatcherBasenames"),
 		analysedDelay: get("analysedDelay"),
 		memoryLimit: get("memoryLimit"),
 	}
@@ -98,6 +114,7 @@ export function deactivate(): void {
 	diagnosticCollection.dispose()
 	outputChannel.dispose()
 	statusBarItem.dispose()
+	configFileWatcher?.dispose()
 	fileWatcher?.dispose()
 }
 

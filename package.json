@@ -23,8 +23,7 @@
     "analyse"
   ],
   "activationEvents": [
-    "workspaceContains:**/phpstan.neon",
-    "workspaceContains:**/phpstan.neon.dist"
+    "*"
   ],
   "repository": {
     "type": "git",
@@ -68,6 +67,22 @@
           "type": "string",
           "description": "File watcher glob pattern",
           "default": "**/*.{php}"
+        },
+        "phpstan.configFileWatcher": {
+          "type": "boolean",
+          "description": "Enables config file watcher",
+          "default": true
+        },
+        "phpstan.configFileWatcherBasenames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Config file watcher basenames",
+          "default": [
+            "phpstan.neon",
+            "phpstan.neon.dist"
+          ]
         },
         "phpstan.analysedDelay": {
           "type": "integer",
