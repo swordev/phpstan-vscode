@@ -33,6 +33,7 @@ type SettingsType = {
 
 const EXT_NAME = "phpstan"
 
+let settingsListener: vscode.Disposable
 let diagnosticCollection: vscode.DiagnosticCollection
 let outputChannel: vscode.OutputChannel
 let statusBarItem: vscode.StatusBarItem
@@ -47,9 +48,10 @@ let currentProcessKilled: boolean | null
 export function activate(context: vscode.ExtensionContext): void {
 	settings = getSettings()
 
-	vscode.workspace.onDidChangeConfiguration((event) => {
+	settingsListener = vscode.workspace.onDidChangeConfiguration((event) => {
 		if (event.affectsConfiguration(EXT_NAME)) {
-			settings = getSettings()
+			deactivate()
+			activate(context)
 		}
 	})
 
@@ -85,6 +87,7 @@ function getSettings(): SettingsType {
 }
 
 export function deactivate(): void {
+	settingsListener?.dispose()
 	diagnosticCollection.dispose()
 	outputChannel.dispose()
 	statusBarItem.dispose()
