@@ -1,5 +1,6 @@
 import * as vscode from "vscode"
 import { ChildProcessWithoutNullStreams, spawn } from "child_process"
+import { waitForClose } from "./util"
 
 type PhpstanResult = {
 	totals: {
@@ -172,13 +173,4 @@ async function refreshDiagnostics(result: PhpstanResult) {
 		}
 		diagnosticCollection.set(vscode.Uri.file(path), diagnostics)
 	}
-}
-
-async function waitForClose(childProcess: ChildProcessWithoutNullStreams) {
-	return new Promise<[number, string]>((resolve, reject) => {
-		let result = ""
-		childProcess.stdout.on("data", (data) => (result += data + "\n"))
-		childProcess.on("error", reject)
-		childProcess.on("close", (exitCode) => resolve([exitCode, result]))
-	})
 }
