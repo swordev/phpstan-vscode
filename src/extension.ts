@@ -21,7 +21,7 @@ type PhpstanResult = {
 	errors: any[]
 }
 
-type Settings = {
+type SettingsType = {
 	enabled: boolean
 	path: string
 	phpPath: string
@@ -37,6 +37,7 @@ let diagnosticCollection: vscode.DiagnosticCollection
 let outputChannel: vscode.OutputChannel
 let statusBarItem: vscode.StatusBarItem
 let watcher: vscode.FileSystemWatcher
+let settings: SettingsType
 
 let currentProcessTimeout: NodeJS.Timeout
 let currentProcess: ChildProcessWithoutNullStreams | null
@@ -44,17 +45,23 @@ let currentProcessKilled: boolean | null
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function activate(context: vscode.ExtensionContext): void {
-	const config = vscode.workspace.getConfiguration(EXT_NAME)
+	settings = getSettings()
 
-	if (!getConfigValue(config, "enabled")) return
+	vscode.workspace.onDidChangeConfiguration((event) => {
+		if (event.affectsConfiguration(EXT_NAME)) {
+			settings = getSettings()
+		}
+	})
+
+	if (!settings.enabled) return
 
 	outputChannel = vscode.window.createOutputChannel(EXT_NAME)
 	diagnosticCollection = vscode.languages.createDiagnosticCollection(EXT_NAME)
 	statusBarItem = vscode.window.createStatusBarItem()
 
-	if (getConfigValue(config, "fileWatcher")) {
+	if (settings.fileWatcher) {
 		watcher = vscode.workspace.createFileSystemWatcher(
-			getConfigValue(config, "fileWatcherPattern")
+			settings.fileWatcherPattern
 		)
 		watcher.onDidChange(async () => phpstanAnalyseDelayed())
 	}
@@ -62,18 +69,26 @@ export function activate(context: vscode.ExtensionContext): void {
 	phpstanAnalyseDelayed(0)
 }
 
+function getSettings(): SettingsType {
+	const config = vscode.workspace.getConfiguration(EXT_NAME)
+	const get = <T extends keyof SettingsType>(name: T) =>
+		config.get(name) as SettingsType[T]
+	return {
+		enabled: get("enabled"),
+		path: get("path"),
+		phpPath: get("phpPath"),
+		fileWatcher: get("fileWatcher"),
+		fileWatcherPattern: get("fileWatcherPattern"),
+		analysedDelay: get("analysedDelay"),
+		memoryLimit: get("memoryLimit"),
+	}
+}
+
 export function deactivate(): void {
 	diagnosticCollection.dispose()
 	outputChannel.dispose()
 	statusBarItem.dispose()
 	watcher?.dispose()
-}
-
-function getConfigValue<T extends keyof Settings>(
-	config: vscode.WorkspaceConfiguration,
-	name: T
-) {
-	return config.get(name) as Settings[T]
 }
 
 function setAnalysingStatusBar(progress?: number) {
@@ -85,7 +100,6 @@ function setAnalysingStatusBar(progress?: number) {
 }
 
 async function phpstanAnalyseDelayed(ms?: number) {
-	const config = vscode.workspace.getConfiguration(EXT_NAME)
 	clearTimeout(currentProcessTimeout)
 	currentProcessTimeout = setTimeout(async () => {
 		if (currentProcess) {
@@ -94,15 +108,13 @@ async function phpstanAnalyseDelayed(ms?: number) {
 		}
 		await phpstanAnalyse()
 		currentProcess = currentProcessKilled = null
-	}, ms ?? (config.get<number>("analysedDelay") as number))
+	}, ms ?? settings.analysedDelay)
 }
 
 async function phpstanAnalyse() {
-	const config = vscode.workspace.getConfiguration(EXT_NAME)
-
-	const phpPath = getConfigValue(config, "phpPath")
-	const phpStanPath = getConfigValue(config, "path")
-	const memoryLimit = getConfigValue(config, "memoryLimit")
+	const phpPath = settings.phpPath
+	const phpStanPath = settings.path
+	const memoryLimit = settings.memoryLimit
 
 	setAnalysingStatusBar()
 
