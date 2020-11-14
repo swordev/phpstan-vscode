@@ -118,11 +118,18 @@ export function deactivate(): void {
 	fileWatcher?.dispose()
 }
 
-function setAnalysingStatusBar(progress?: number) {
+function setStatusBarProgress(progress?: number) {
 	let text = "$(sync~spin) PHPStan analysing..."
 	if (progress > 0) text += ` (${progress}%)`
 	statusBarItem.text = text
 	statusBarItem.tooltip = ""
+	statusBarItem.show()
+}
+
+function setStatusBarError(error: Error, source: string) {
+	outputChannel.appendLine(error.message)
+	statusBarItem.text = `$(error) PHPStan`
+	statusBarItem.tooltip = `${source}: ${error.message}`
 	statusBarItem.show()
 }
 
@@ -139,7 +146,7 @@ async function phpstanAnalyseDelayed(ms?: number) {
 }
 
 async function phpstanAnalyse() {
-	setAnalysingStatusBar()
+	setStatusBarProgress()
 
 	try {
 		const args = ["-f", settings.path, "analyse"]
@@ -160,7 +167,7 @@ async function phpstanAnalyse() {
 
 		childProcess.stderr.on("data", (data: Buffer) => {
 			const progress = /(\d{1,3})%\s*$/.exec(data.toString())?.[1]
-			if (progress) setAnalysingStatusBar(Number(progress))
+			if (progress) setStatusBarProgress(Number(progress))
 			outputChannel.appendLine(data.toString())
 		})
 
@@ -175,10 +182,7 @@ async function phpstanAnalyse() {
 
 		refreshDiagnostics(phpstanResult)
 	} catch (error) {
-		outputChannel.appendLine((error as Error).message)
-		statusBarItem.text = `$(error) PHPStan`
-		statusBarItem.tooltip = `Spawn error: ${(error as Error).message}`
-		return
+		return setStatusBarError(error, "Spawn error")
 	}
 
 	statusBarItem.tooltip = ""
