@@ -38,6 +38,10 @@
       {
         "command": "phpstan.output",
         "title": "PHPStan: Go to output"
+      },
+      {
+        "command": "phpstan.analyse",
+        "title": "PHPStan: Analyse"
       }
     ],
     "configuration": {
