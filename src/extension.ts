@@ -127,6 +127,7 @@ function setStatusBarProgress(progress?: number) {
 }
 
 function setStatusBarError(error: Error, source: string) {
+	outputChannel.appendLine(`# ${source}`)
 	outputChannel.appendLine(error.message)
 	statusBarItem.text = `$(error) PHPStan`
 	statusBarItem.tooltip = `${source}: ${error.message}`
