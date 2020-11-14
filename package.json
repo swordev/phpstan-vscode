@@ -8,7 +8,7 @@
   "author": "Juanra Gálvez <juanrgm724@gmail.com>",
   "icon": "assets/logo.png",
   "engines": {
-    "vscode": "^1.51.0"
+    "vscode": "^1.50.0"
   },
   "categories": [
     "Linters",
@@ -107,7 +107,7 @@
   },
   "devDependencies": {
     "@types/node": "^14.14.6",
-    "@types/vscode": "^1.51.0",
+    "@types/vscode": "^1.50.0",
     "@typescript-eslint/eslint-plugin": "^4.6.1",
     "@typescript-eslint/parser": "^4.6.1",
     "eslint": "^7.13.0",
