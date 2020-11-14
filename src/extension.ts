@@ -16,6 +16,7 @@ type SettingsType = {
 
 const EXT_NAME = "phpstan"
 
+let outputCommandListener: vscode.Disposable
 let settingsListener: vscode.Disposable
 let diagnosticCollection: vscode.DiagnosticCollection
 let outputChannel: vscode.OutputChannel
@@ -50,6 +51,12 @@ export function activate(context: vscode.ExtensionContext): void {
 	outputChannel = vscode.window.createOutputChannel(EXT_NAME)
 	diagnosticCollection = vscode.languages.createDiagnosticCollection(EXT_NAME)
 	statusBarItem = vscode.window.createStatusBarItem()
+	statusBarItem.command = "phpstan.output"
+
+	outputCommandListener = vscode.commands.registerCommand(
+		"phpstan.output",
+		() => outputChannel.show()
+	)
 
 	if (settings.configFileWatcher) {
 		configFileWatcher = vscode.workspace.createFileSystemWatcher(
@@ -114,6 +121,7 @@ function createFileWatcher() {
 }
 
 export function deactivate(): void {
+	outputCommandListener?.dispose()
 	settingsListener?.dispose()
 	diagnosticCollection.dispose()
 	outputChannel.dispose()

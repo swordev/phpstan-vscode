@@ -34,6 +34,12 @@
   },
   "main": "./lib/extension.js",
   "contributes": {
+    "commands": [
+      {
+        "command": "phpstan.output",
+        "title": "PHPStan: Go to output"
+      }
+    ],
     "configuration": {
       "type": "object",
       "title": "PHPStan",
