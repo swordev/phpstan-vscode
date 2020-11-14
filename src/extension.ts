@@ -123,9 +123,9 @@ function createFileWatcher() {
 export function deactivate(): void {
 	outputCommandListener?.dispose()
 	settingsListener?.dispose()
-	diagnosticCollection.dispose()
-	outputChannel.dispose()
-	statusBarItem.dispose()
+	diagnosticCollection?.dispose()
+	outputChannel?.dispose()
+	statusBarItem?.dispose()
 	configFileWatcher?.dispose()
 	fileWatcher?.dispose()
 }
