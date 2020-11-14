@@ -84,7 +84,11 @@ function getSettings(): SettingsType {
 
 async function init() {
 	fileWatcher?.dispose()
-	config = await PHPStan.parseConfig()
+	try {
+		config = await PHPStan.parseConfig()
+	} catch (error) {
+		return setStatusBarError(error, "Parse config error")
+	}
 	outputChannel.appendLine(`# Config:\n${JSON.stringify(config, null, 2)}`)
 	if (config) {
 		if (settings.fileWatcher) fileWatcher = createFileWatcher()
