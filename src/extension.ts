@@ -16,14 +16,6 @@ type SettingsType = {
 
 const EXT_NAME = "phpstan"
 
-let analyseCommandListener: vscode.Disposable
-let outputCommandListener: vscode.Disposable
-let settingsListener: vscode.Disposable
-let diagnosticCollection: vscode.DiagnosticCollection
-let outputChannel: vscode.OutputChannel
-let statusBarItem: vscode.StatusBarItem
-let configFileWatcher: vscode.FileSystemWatcher
-let fileWatcher: vscode.FileSystemWatcher
 let currentProcessTimeout: NodeJS.Timeout
 let currentProcess: ChildProcessWithoutNullStreams | null
 let currentProcessKilled: boolean | null
@@ -31,15 +23,26 @@ let currentProcessKilled: boolean | null
 let config: ConfigType = null
 let settings: SettingsType = null
 
+const $: {
+	diagnosticCollection?: vscode.DiagnosticCollection
+	outputChannel?: vscode.OutputChannel
+	statusBarItem?: vscode.StatusBarItem
+	configFileWatcher?: vscode.FileSystemWatcher
+	fileWatcher?: vscode.FileSystemWatcher
+	listeners?: vscode.Disposable[]
+} = {}
+
 export function activate(context: vscode.ExtensionContext): void {
 	settings = getSettings()
 
-	settingsListener = vscode.workspace.onDidChangeConfiguration((event) => {
-		if (event.affectsConfiguration(EXT_NAME)) {
-			deactivate()
-			activate(context)
-		}
-	})
+	$.listeners = [
+		vscode.workspace.onDidChangeConfiguration((event) => {
+			if (event.affectsConfiguration(EXT_NAME)) {
+				deactivate()
+				activate(context)
+			}
+		}),
+	]
 
 	if (!settings.enabled) return
 
@@ -49,30 +52,30 @@ export function activate(context: vscode.ExtensionContext): void {
 		rootPath: vscode.workspace.rootPath,
 	}
 
-	outputChannel = vscode.window.createOutputChannel(EXT_NAME)
-	diagnosticCollection = vscode.languages.createDiagnosticCollection(EXT_NAME)
-	statusBarItem = vscode.window.createStatusBarItem()
-	statusBarItem.command = "phpstan.output"
-
-	outputCommandListener = vscode.commands.registerCommand(
-		"phpstan.output",
-		() => outputChannel.show()
+	$.outputChannel = vscode.window.createOutputChannel(EXT_NAME)
+	$.diagnosticCollection = vscode.languages.createDiagnosticCollection(
+		EXT_NAME
 	)
-
-	analyseCommandListener = vscode.commands.registerCommand(
-		"phpstan.analyse",
-		() => phpstanAnalyseDelayed()
+	$.statusBarItem = vscode.window.createStatusBarItem()
+	$.statusBarItem.command = "phpstan.output"
+	$.listeners.push(
+		vscode.commands.registerCommand("phpstan.output", () =>
+			$.outputChannel.show()
+		),
+		vscode.commands.registerCommand("phpstan.analyse", () =>
+			phpstanAnalyseDelayed()
+		)
 	)
 
 	if (settings.configFileWatcher) {
-		configFileWatcher = vscode.workspace.createFileSystemWatcher(
+		$.configFileWatcher = vscode.workspace.createFileSystemWatcher(
 			new vscode.RelativePattern(
 				vscode.workspace.rootPath,
 				`{${settings.configFileWatcherBasenames.join(",")}}`
 			)
 		)
-		configFileWatcher.onDidChange(async (uri) => {
-			outputChannel.appendLine(`# Config file changed: ${uri.fsPath}`)
+		$.configFileWatcher.onDidChange(async (uri) => {
+			$.outputChannel.appendLine(`# Config file changed: ${uri.fsPath}`)
 			await init()
 		})
 		init()
@@ -96,15 +99,15 @@ function getSettings(): SettingsType {
 }
 
 async function init() {
-	fileWatcher?.dispose()
+	$.fileWatcher?.dispose()
 	try {
 		config = await PHPStan.parseConfig()
 	} catch (error) {
 		return setStatusBarError(error, "Parse config error")
 	}
-	outputChannel.appendLine(`# Config:\n${JSON.stringify(config, null, 2)}`)
+	$.outputChannel.appendLine(`# Config:\n${JSON.stringify(config, null, 2)}`)
 	if (config) {
-		if (settings.fileWatcher) fileWatcher = createFileWatcher()
+		if (settings.fileWatcher) $.fileWatcher = createFileWatcher()
 		phpstanAnalyseDelayed(0)
 	}
 }
@@ -117,7 +120,7 @@ function createFileWatcher() {
 	watcher.onDidChange(async (uri) => {
 		for (const path of config.parameters.paths) {
 			if (uri.fsPath.startsWith(path)) {
-				outputChannel.appendLine(`# File changed: ${uri.fsPath}`)
+				$.outputChannel.appendLine(`# File changed: ${uri.fsPath}`)
 				return await phpstanAnalyseDelayed()
 			}
 		}
@@ -127,30 +130,39 @@ function createFileWatcher() {
 }
 
 export function deactivate(): void {
-	analyseCommandListener?.dispose()
-	outputCommandListener?.dispose()
-	settingsListener?.dispose()
-	diagnosticCollection?.dispose()
-	outputChannel?.dispose()
-	statusBarItem?.dispose()
-	configFileWatcher?.dispose()
-	fileWatcher?.dispose()
+	for (const key in $) {
+		const value = $[key]
+		if (isDisposable(value)) {
+			value.dispose()
+		} else if (Array.isArray(value)) {
+			for (const subvalue of value) {
+				if (isDisposable(subvalue)) {
+					subvalue.dispose()
+				}
+			}
+		}
+		delete $[key]
+	}
+}
+
+function isDisposable(object: unknown): object is vscode.Disposable {
+	return object && typeof object["dispose"] === "function"
 }
 
 function setStatusBarProgress(progress?: number) {
 	let text = "$(sync~spin) PHPStan analysing..."
 	if (progress > 0) text += ` (${progress}%)`
-	statusBarItem.text = text
-	statusBarItem.tooltip = ""
-	statusBarItem.show()
+	$.statusBarItem.text = text
+	$.statusBarItem.tooltip = ""
+	$.statusBarItem.show()
 }
 
 function setStatusBarError(error: Error, source: string) {
-	outputChannel.appendLine(`# ${source}`)
-	outputChannel.appendLine(error.message)
-	statusBarItem.text = `$(error) PHPStan`
-	statusBarItem.tooltip = `${source}: ${error.message}`
-	statusBarItem.show()
+	$.outputChannel.appendLine(`# ${source}`)
+	$.outputChannel.appendLine(error.message)
+	$.statusBarItem.text = `$(error) PHPStan`
+	$.statusBarItem.tooltip = `${source}: ${error.message}`
+	$.statusBarItem.show()
 }
 
 async function phpstanAnalyseDelayed(ms?: number) {
@@ -182,13 +194,13 @@ async function phpstanAnalyse() {
 		}))
 
 		childProcess.stdout.on("data", (data: Buffer) =>
-			outputChannel.appendLine(data.toString())
+			$.outputChannel.appendLine(data.toString())
 		)
 
 		childProcess.stderr.on("data", (data: Buffer) => {
 			const progress = /(\d{1,3})%\s*$/.exec(data.toString())?.[1]
 			if (progress) setStatusBarProgress(Number(progress))
-			outputChannel.appendLine(data.toString())
+			$.outputChannel.appendLine(data.toString())
 		})
 
 		const [, stdout] = await waitForClose(childProcess)
@@ -205,12 +217,12 @@ async function phpstanAnalyse() {
 		return setStatusBarError(error, "Spawn error")
 	}
 
-	statusBarItem.tooltip = ""
-	statusBarItem.hide()
+	$.statusBarItem.tooltip = ""
+	$.statusBarItem.hide()
 }
 
 async function refreshDiagnostics(result: ResultType) {
-	diagnosticCollection.clear()
+	$.diagnosticCollection.clear()
 
 	for (const path in result.files) {
 		const pathItem = result.files[path]
@@ -230,6 +242,6 @@ async function refreshDiagnostics(result: ResultType) {
 
 			diagnostics.push(diagnostic)
 		}
-		diagnosticCollection.set(vscode.Uri.file(path), diagnostics)
+		$.diagnosticCollection.set(vscode.Uri.file(path), diagnostics)
 	}
 }
