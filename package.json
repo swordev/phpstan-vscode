@@ -36,8 +36,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "phpstan.output",
-        "title": "PHPStan: Go to output"
+        "command": "phpstan.showOutput",
+        "title": "PHPStan: Show output"
       },
       {
         "command": "phpstan.analyse",

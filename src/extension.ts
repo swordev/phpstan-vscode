@@ -57,13 +57,14 @@ export function activate(context: vscode.ExtensionContext): void {
 		EXT_NAME
 	)
 	$.statusBarItem = vscode.window.createStatusBarItem()
-	$.statusBarItem.command = "phpstan.output"
 	$.listeners.push(
-		vscode.commands.registerCommand("phpstan.output", () =>
-			$.outputChannel.show()
+		vscode.commands.registerCommand(
+			getCommandName(showOutputCommand),
+			showOutputCommand
 		),
-		vscode.commands.registerCommand("phpstan.analyse", () =>
-			phpstanAnalyseDelayed()
+		vscode.commands.registerCommand(
+			getCommandName(analyseCommand),
+			analyseCommand
 		)
 	)
 
@@ -108,7 +109,7 @@ async function init() {
 	$.outputChannel.appendLine(`# Config:\n${JSON.stringify(config, null, 2)}`)
 	if (config) {
 		if (settings.fileWatcher) $.fileWatcher = createFileWatcher()
-		phpstanAnalyseDelayed(0)
+		analyseCommand(0)
 	}
 }
 
@@ -121,7 +122,7 @@ function createFileWatcher() {
 		for (const path of config.parameters.paths) {
 			if (uri.fsPath.startsWith(path)) {
 				$.outputChannel.appendLine(`# File changed: ${uri.fsPath}`)
-				return await phpstanAnalyseDelayed()
+				return await analyseCommand()
 			}
 		}
 	})
@@ -154,6 +155,7 @@ function setStatusBarProgress(progress?: number) {
 	if (progress > 0) text += ` (${progress}%)`
 	$.statusBarItem.text = text
 	$.statusBarItem.tooltip = ""
+	$.statusBarItem.command = getCommandName(showOutputCommand)
 	$.statusBarItem.show()
 }
 
@@ -162,10 +164,19 @@ function setStatusBarError(error: Error, source: string) {
 	$.outputChannel.appendLine(error.message)
 	$.statusBarItem.text = `$(error) PHPStan`
 	$.statusBarItem.tooltip = `${source}: ${error.message}`
+	$.statusBarItem.command = getCommandName(showOutputCommand)
 	$.statusBarItem.show()
 }
 
-async function phpstanAnalyseDelayed(ms?: number) {
+function getCommandName(commandFunction: () => void) {
+	return `${EXT_NAME}.${commandFunction.name.replace(/Command$/, "")}`
+}
+
+function showOutputCommand() {
+	$.outputChannel.show()
+}
+
+async function analyseCommand(ms?: number) {
 	clearTimeout(currentProcessTimeout)
 	currentProcessTimeout = setTimeout(async () => {
 		if (currentProcess) {
