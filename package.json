@@ -42,6 +42,18 @@
       {
         "command": "phpstan.analyse",
         "title": "PHPStan: Analyse"
+      },
+      {
+        "command": "phpstan.pauseFileWatcher",
+        "title": "PHPStan: Pause file watcher"
+      },
+      {
+        "command": "phpstan.resumeFileWatcher",
+        "title": "PHPStan: Resume file watcher"
+      },
+      {
+        "command": "phpstan.toggleFileWatcher",
+        "title": "PHPStan: Toggle file watcher"
       }
     ],
     "configuration": {

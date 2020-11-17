@@ -22,6 +22,7 @@ let currentProcessKilled: boolean | null
 
 let config: ConfigType = null
 let settings: SettingsType = null
+let fileWatcherState = true
 
 const $: {
 	diagnosticCollection?: vscode.DiagnosticCollection
@@ -65,6 +66,18 @@ export function activate(context: vscode.ExtensionContext): void {
 		vscode.commands.registerCommand(
 			getCommandName(analyseCommand),
 			analyseCommand
+		),
+		vscode.commands.registerCommand(
+			getCommandName(pauseFileWatcherCommand),
+			pauseFileWatcherCommand
+		),
+		vscode.commands.registerCommand(
+			getCommandName(resumeFileWatcherCommand),
+			resumeFileWatcherCommand
+		),
+		vscode.commands.registerCommand(
+			getCommandName(toggleFileWatcherCommand),
+			toggleFileWatcherCommand
 		)
 	)
 
@@ -76,6 +89,7 @@ export function activate(context: vscode.ExtensionContext): void {
 			)
 		)
 		$.configFileWatcher.onDidChange(async (uri) => {
+			if (!fileWatcherState) return
 			$.outputChannel.appendLine(`# Config file changed: ${uri.fsPath}`)
 			await init()
 		})
@@ -119,6 +133,7 @@ function createFileWatcher() {
 	)
 
 	watcher.onDidChange(async (uri) => {
+		if (!fileWatcherState) return
 		for (const path of config.parameters.paths) {
 			if (uri.fsPath.startsWith(path)) {
 				$.outputChannel.appendLine(`# File changed: ${uri.fsPath}`)
@@ -168,6 +183,13 @@ function setStatusBarError(error: Error, source: string) {
 	$.statusBarItem.show()
 }
 
+function setStatusBarPausedFileWatcher() {
+	$.statusBarItem.text = "$(debug-pause) PHPStan"
+	$.statusBarItem.tooltip = "Resume file watcher"
+	$.statusBarItem.command = getCommandName(resumeFileWatcherCommand)
+	$.statusBarItem.show()
+}
+
 function getCommandName(commandFunction: () => void) {
 	return `${EXT_NAME}.${commandFunction.name.replace(/Command$/, "")}`
 }
@@ -186,6 +208,20 @@ async function analyseCommand(ms?: number) {
 		await phpstanAnalyse()
 		currentProcess = currentProcessKilled = null
 	}, ms ?? settings.analysedDelay)
+}
+
+function pauseFileWatcherCommand() {
+	fileWatcherState = false
+	setStatusBarPausedFileWatcher()
+}
+
+function resumeFileWatcherCommand() {
+	fileWatcherState = true
+	analyseCommand()
+}
+
+function toggleFileWatcherCommand() {
+	fileWatcherState ? pauseFileWatcherCommand() : resumeFileWatcherCommand()
 }
 
 async function phpstanAnalyse() {
