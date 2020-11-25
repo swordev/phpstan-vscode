@@ -88,9 +88,11 @@ export function activate(context: vscode.ExtensionContext): void {
 				`{${settings.configFileWatcherBasenames.join(",")}}`
 			)
 		)
-		$.configFileWatcher.onDidChange(async (uri) => {
+		onFileWatcherEvent($.configFileWatcher, async (uri, eventName) => {
 			if (!fileWatcherState) return
-			$.outputChannel.appendLine(`# Config file changed: ${uri.fsPath}`)
+			$.outputChannel.appendLine(
+				`# Config file ${eventName}: ${uri.fsPath}`
+			)
 			await init()
 		})
 		init()
@@ -132,11 +134,11 @@ function createFileWatcher() {
 		`**/*.{${config.parameters.fileExtensions.join(",")}}`
 	)
 
-	watcher.onDidChange(async (uri) => {
+	onFileWatcherEvent(watcher, async (uri, eventName) => {
 		if (!fileWatcherState) return
 		for (const path of config.parameters.paths) {
 			if (uri.fsPath.startsWith(path)) {
-				$.outputChannel.appendLine(`# File changed: ${uri.fsPath}`)
+				$.outputChannel.appendLine(`# File ${eventName}: ${uri.fsPath}`)
 				return await analyseCommand()
 			}
 		}
@@ -159,6 +161,15 @@ export function deactivate(): void {
 		}
 		delete $[key]
 	}
+}
+
+function onFileWatcherEvent(
+	watcher: vscode.FileSystemWatcher,
+	cb: (uri: vscode.Uri, eventName: "created" | "deleted" | "changed") => void
+) {
+	watcher.onDidCreate((uri) => cb(uri, "created"))
+	watcher.onDidDelete((uri) => cb(uri, "deleted"))
+	watcher.onDidChange((uri) => cb(uri, "changed"))
 }
 
 function isDisposable(object: unknown): object is vscode.Disposable {
