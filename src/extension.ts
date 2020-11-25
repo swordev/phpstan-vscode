@@ -20,6 +20,8 @@ let currentProcessTimeout: NodeJS.Timeout
 let currentProcess: ChildProcessWithoutNullStreams | null
 let currentProcessKilled: boolean | null
 
+let initTimeout: NodeJS.Timeout
+
 let config: ConfigType = null
 let settings: SettingsType = null
 let fileWatcherState = true
@@ -93,7 +95,8 @@ export function activate(context: vscode.ExtensionContext): void {
 			$.outputChannel.appendLine(
 				`# Config file ${eventName}: ${uri.fsPath}`
 			)
-			await init()
+			clearTimeout(initTimeout)
+			initTimeout = setTimeout(async () => await init(), 250)
 		})
 		init()
 	}
