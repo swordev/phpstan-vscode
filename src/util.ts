@@ -1,6 +1,20 @@
-import { ChildProcessWithoutNullStreams } from "child_process"
+import { ChildProcessWithoutNullStreams, exec } from "child_process"
 import { promises as fs } from "fs"
+import { platform } from "os"
 import { parse } from "yaml"
+
+export async function killProcess(
+	process: ChildProcessWithoutNullStreams
+): Promise<void> {
+	const os = platform()
+	if (os === "win32") {
+		return new Promise((resolve) => {
+			exec(`taskkill /pid ${process.pid} /T /F`, () => resolve())
+		})
+	} else {
+		process.kill()
+	}
+}
 
 export async function checkFile(path: string): Promise<boolean> {
 	try {

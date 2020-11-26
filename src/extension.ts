@@ -1,6 +1,6 @@
 import * as vscode from "vscode"
 import { ChildProcessWithoutNullStreams, spawn } from "child_process"
-import { waitForClose } from "./util"
+import { killProcess, waitForClose } from "./util"
 import { PHPStan, ConfigType, ResultType } from "./PHPStan"
 
 type SettingsType = {
@@ -217,7 +217,7 @@ async function analyseCommand(ms?: number) {
 	currentProcessTimeout = setTimeout(async () => {
 		if (currentProcess) {
 			currentProcessKilled = true
-			currentProcess.kill()
+			killProcess(currentProcess)
 		}
 		await phpstanAnalyse()
 		currentProcess = currentProcessKilled = null
