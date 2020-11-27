@@ -1,15 +1,27 @@
 # phpstan-vscode
 
-[PHPStan](https://phpstan.org) for VSCode.
+[PHPStan](https://phpstan.org) extension for VSCode.
+
+> Analyzes your PHP project manually or on every file change with PHPStan and shows the result in the VSCode problems tab.
 
 ## Features
 
-- Activates the extension if it detects `phpstan.neon`/`phpstan.neon.dist` file on project root dir.
+- Activates the extension if it detects `phpstan.neon`/`phpstan.neon.dist` file on the project root dir.
 - Runs PHPStan analyse on every PHP file change.
-- Shows all PHPStan problems of whole project.
+- Shows all PHPStan problems of the whole project.
 - Parses PHPStan config for file watching.
+- Commands:
+    - `phpstan.showOutput`: show output.
+    - `phpstan.analyse`: analyse.
+    - `phpstan.pauseFileWatcher`: pause file watcher.
+    - `phpstan.resumeFileWatcher`: resume file watcher.
+    - `phpstan.toggleFileWatcher`: toggle file watcher.
+    
+## Usage
 
-## Requirements
+1. Install [PHPStan extension](https://marketplace.visualstudio.com/items?itemName=swordev.phpstan).
+2. Provide a [phpstan.neon](https://phpstan.org/config-reference#neon-format) file on the project root dir.
+3. Install PHPStan on the project.
 
 ```sh
 composer require phpstan/phpstan --dev
