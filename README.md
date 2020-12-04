@@ -1,5 +1,9 @@
 # phpstan-vscode
 
+![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/swordev.phpstan)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/swordev/phpstan-vscode/CI)
+![Visual Studio Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/swordev.phpstan)
+
 [PHPStan](https://phpstan.org) extension for VSCode.
 
 > Analyzes your PHP project manually or on every file change with PHPStan and shows the result in the VSCode problems tab.
