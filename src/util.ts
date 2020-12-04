@@ -37,7 +37,7 @@ export async function waitForClose(
 ): Promise<[number, string]> {
 	return new Promise<[number, string]>((resolve, reject) => {
 		let result = ""
-		childProcess.stdout.on("data", (data) => (result += data + "\n"))
+		childProcess.stdout.on("data", (data) => (result += data))
 		childProcess.on("error", reject)
 		childProcess.on("close", (exitCode) => resolve([exitCode, result]))
 	})
