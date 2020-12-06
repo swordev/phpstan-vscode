@@ -170,6 +170,13 @@ function isDisposable(object: unknown): object is vscode.Disposable {
 	return object && typeof object["dispose"] === "function"
 }
 
+function clearStatusBar() {
+	delete $.statusBarItem.text
+	delete $.statusBarItem.tooltip
+	delete $.statusBarItem.command
+	$.statusBarItem.hide()
+}
+
 function setStatusBarProgress(progress?: number) {
 	let text = "$(sync~spin) PHPStan analysing..."
 	if (progress > 0) text += ` (${progress}%)`
@@ -269,8 +276,7 @@ async function phpstanAnalyse() {
 		return setStatusBarError(error, "Spawn error")
 	}
 
-	$.statusBarItem.tooltip = ""
-	$.statusBarItem.hide()
+	clearStatusBar()
 }
 
 async function refreshDiagnostics(result: ResultType) {
