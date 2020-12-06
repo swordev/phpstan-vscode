@@ -68,6 +68,7 @@ export function activate(context: vscode.ExtensionContext): void {
 		resumeFileWatcherCommand,
 		toggleFileWatcherCommand,
 		clearProblemsCommand,
+		clearCacheCommand,
 	]
 
 	for (const command of commands)
@@ -239,6 +240,39 @@ function toggleFileWatcherCommand() {
 
 function clearProblemsCommand() {
 	$.diagnosticCollection.clear()
+}
+
+async function clearCacheCommand() {
+	$.outputChannel.appendLine("# Command: clearCache")
+
+	$.statusBarItem.text = "$(sync~spin) PHPStan clearing cache..."
+	$.statusBarItem.tooltip = ""
+	$.statusBarItem.command = getCommandName(showOutputCommand)
+	$.statusBarItem.show()
+
+	try {
+		const childProcess = spawn(
+			settings.phpPath,
+			["-f", settings.path, "clear-result-cache"],
+			{
+				cwd: vscode.workspace.rootPath,
+			}
+		)
+
+		childProcess.stdout.on("data", (data: Buffer) =>
+			$.outputChannel.appendLine(data.toString())
+		)
+
+		childProcess.stderr.on("data", (data: Buffer) => {
+			$.outputChannel.appendLine(data.toString())
+		})
+
+		await waitForClose(childProcess)
+	} catch (error) {
+		$.outputChannel.appendLine(error)
+	}
+
+	clearStatusBar()
 }
 
 async function phpstanAnalyse() {

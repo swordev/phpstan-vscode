@@ -21,6 +21,7 @@
     - `phpstan.resumeFileWatcher`: resume file watcher.
     - `phpstan.toggleFileWatcher`: toggle file watcher.
     - `phpstan.clearProblems`: clear problems.
+    - `phpstan.clearCache`: clear cache.
     
 ## Usage
 

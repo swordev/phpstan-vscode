@@ -58,6 +58,10 @@
       {
         "command": "phpstan.clearProblems",
         "title": "PHPStan: Clear problems"
+      },
+      {
+        "command": "phpstan.clearCache",
+        "title": "PHPStan: Clear cache"
       }
     ],
     "configuration": {
