@@ -60,28 +60,19 @@ export function activate(context: vscode.ExtensionContext): void {
 		EXT_NAME
 	)
 	$.statusBarItem = vscode.window.createStatusBarItem()
-	$.listeners.push(
-		vscode.commands.registerCommand(
-			getCommandName(showOutputCommand),
-			showOutputCommand
-		),
-		vscode.commands.registerCommand(
-			getCommandName(analyseCommand),
-			analyseCommand
-		),
-		vscode.commands.registerCommand(
-			getCommandName(pauseFileWatcherCommand),
-			pauseFileWatcherCommand
-		),
-		vscode.commands.registerCommand(
-			getCommandName(resumeFileWatcherCommand),
-			resumeFileWatcherCommand
-		),
-		vscode.commands.registerCommand(
-			getCommandName(toggleFileWatcherCommand),
-			toggleFileWatcherCommand
+
+	const commands: ((...args: unknown[]) => void)[] = [
+		showOutputCommand,
+		analyseCommand,
+		pauseFileWatcherCommand,
+		resumeFileWatcherCommand,
+		toggleFileWatcherCommand,
+	]
+
+	for (const command of commands)
+		$.listeners.push(
+			vscode.commands.registerCommand(getCommandName(command), command)
 		)
-	)
 
 	if (settings.configFileWatcher) {
 		$.configFileWatcher = vscode.workspace.createFileSystemWatcher(
