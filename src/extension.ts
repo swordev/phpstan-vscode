@@ -212,14 +212,14 @@ function showOutputCommand() {
 	$.outputChannel.show()
 }
 
-async function analyseCommand(ms?: number) {
+async function analyseCommand(ms?: number, args?: string[]) {
 	clearTimeout(currentProcessTimeout)
 	currentProcessTimeout = setTimeout(async () => {
 		if (currentProcess) {
 			currentProcessKilled = true
 			await killProcess(currentProcess)
 		}
-		await phpstanAnalyse()
+		await phpstanAnalyse(args)
 		currentProcess = currentProcessKilled = null
 	}, ms ?? settings.analysedDelay)
 }
@@ -275,17 +275,18 @@ async function clearCacheCommand() {
 	clearStatusBar()
 }
 
-async function phpstanAnalyse() {
+async function phpstanAnalyse(args?: string[]) {
 	setStatusBarProgress()
 
 	try {
-		const args = ["-f", settings.path, "analyse"]
+		args = ["-f", settings.path, "analyse"]
 			.concat(
 				settings.memoryLimit
 					? ["--memory-limit=" + settings.memoryLimit]
 					: []
 			)
 			.concat(["--error-format=json"])
+			.concat(args ?? [])
 
 		const childProcess = (currentProcess = spawn(settings.phpPath, args, {
 			cwd: vscode.workspace.rootPath,
