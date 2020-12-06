@@ -217,7 +217,7 @@ async function analyseCommand(ms?: number) {
 	currentProcessTimeout = setTimeout(async () => {
 		if (currentProcess) {
 			currentProcessKilled = true
-			killProcess(currentProcess)
+			await killProcess(currentProcess)
 		}
 		await phpstanAnalyse()
 		currentProcess = currentProcessKilled = null
