@@ -67,6 +67,7 @@ export function activate(context: vscode.ExtensionContext): void {
 		pauseFileWatcherCommand,
 		resumeFileWatcherCommand,
 		toggleFileWatcherCommand,
+		clearProblemsCommand,
 	]
 
 	for (const command of commands)
@@ -234,6 +235,10 @@ function resumeFileWatcherCommand() {
 
 function toggleFileWatcherCommand() {
 	fileWatcherState ? pauseFileWatcherCommand() : resumeFileWatcherCommand()
+}
+
+function clearProblemsCommand() {
+	$.diagnosticCollection.clear()
 }
 
 async function phpstanAnalyse() {

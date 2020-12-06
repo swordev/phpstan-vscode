@@ -54,6 +54,10 @@
       {
         "command": "phpstan.toggleFileWatcher",
         "title": "PHPStan: Toggle file watcher"
+      },
+      {
+        "command": "phpstan.clearProblems",
+        "title": "PHPStan: Clear problems"
       }
     ],
     "configuration": {
