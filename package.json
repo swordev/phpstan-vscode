@@ -68,6 +68,18 @@
         "title": "PHPStan: Clear cache"
       }
     ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "phpstan.analyseCurrentPath",
+          "when": "resourceLangId == php && phpstan:enabled"
+        },
+        {
+          "command": "phpstan.analyseCurrentPath",
+          "when": "explorerResourceIsFolder && phpstan:enabled"
+        }
+      ]
+    },
     "configuration": {
       "type": "object",
       "title": "PHPStan",

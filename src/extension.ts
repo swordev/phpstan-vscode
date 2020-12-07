@@ -49,6 +49,8 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	if (!settings.enabled) return
 
+	vscode.commands.executeCommand("setContext", `${EXT_NAME}:enabled`, true)
+
 	PHPStan.settings = {
 		basenames: settings.configFileWatcherBasenames,
 		path: settings.path,
@@ -158,6 +160,7 @@ export function deactivate(): void {
 		}
 		delete $[key]
 	}
+	vscode.commands.executeCommand("setContext", `${EXT_NAME}:enabled`, false)
 }
 
 function onFileWatcherEvent(

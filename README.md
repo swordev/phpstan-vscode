@@ -18,6 +18,7 @@
     - `phpstan.showOutput`: show output.
     - `phpstan.analyse`: analyse.
     - `phpstan.analyseCurrentPath`: analyse current path.
+        - Also available in the explorer context menu.
     - `phpstan.pauseFileWatcher`: pause file watcher.
     - `phpstan.resumeFileWatcher`: resume file watcher.
     - `phpstan.toggleFileWatcher`: toggle file watcher.
