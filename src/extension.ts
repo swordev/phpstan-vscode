@@ -64,6 +64,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	const commands: ((...args: unknown[]) => void)[] = [
 		showOutputCommand,
 		analyseCommand,
+		analyseCurrentPathCommand,
 		pauseFileWatcherCommand,
 		resumeFileWatcherCommand,
 		toggleFileWatcherCommand,
@@ -222,6 +223,12 @@ async function analyseCommand(ms?: number, args?: string[]) {
 		await phpstanAnalyse(args)
 		currentProcess = currentProcessKilled = null
 	}, ms ?? settings.analysedDelay)
+}
+
+async function analyseCurrentPathCommand(uri: vscode.Uri) {
+	const path =
+		uri?.fsPath || vscode.window.activeTextEditor?.document.uri.fsPath
+	if (path) await analyseCommand(null, [path])
 }
 
 function pauseFileWatcherCommand() {

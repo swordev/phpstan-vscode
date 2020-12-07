@@ -44,6 +44,10 @@
         "title": "PHPStan: Analyse"
       },
       {
+        "command": "phpstan.analyseCurrentPath",
+        "title": "PHPStan: Analyse current path"
+      },
+      {
         "command": "phpstan.pauseFileWatcher",
         "title": "PHPStan: Pause file watcher"
       },

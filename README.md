@@ -17,6 +17,7 @@
 - Commands:
     - `phpstan.showOutput`: show output.
     - `phpstan.analyse`: analyse.
+    - `phpstan.analyseCurrentPath`: analyse current path.
     - `phpstan.pauseFileWatcher`: pause file watcher.
     - `phpstan.resumeFileWatcher`: resume file watcher.
     - `phpstan.toggleFileWatcher`: toggle file watcher.
