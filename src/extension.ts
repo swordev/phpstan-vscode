@@ -219,6 +219,7 @@ function showOutputCommand() {
 async function analyseCommand(ms?: number, args?: string[]) {
 	clearTimeout(currentProcessTimeout)
 	currentProcessTimeout = setTimeout(async () => {
+		$.outputChannel.appendLine("# Command: analyse")
 		if (currentProcess) {
 			currentProcessKilled = true
 			await killProcess(currentProcess)
