@@ -1,3 +1,15 @@
+## [1.4.2](https://github.com/swordev/phpstan-vscode/compare/v1.4.1...v1.4.2) (2021-02-19)
+
+
+### Bug Fixes
+
+* change diagnostic error line ([010dd81](https://github.com/swordev/phpstan-vscode/commit/010dd81b14b601a8d360bfcf728679939ff2d3e5))
+* diagnose global errors ([a4a1cd6](https://github.com/swordev/phpstan-vscode/commit/a4a1cd68ebe1390988fbdaed5cba498cab6a6e2e))
+* parse diagnostic path ([742a614](https://github.com/swordev/phpstan-vscode/commit/256048b0192328e5d5714194d6ee670916aa46f1))
+* sanitize workspace path ([fb2c07d](https://github.com/swordev/phpstan-vscode/commit/7bd58740b07c416aefd3080374e226537d311daf))
+
+
+
 ## [1.4.1](https://github.com/swordev/phpstan-vscode/compare/v1.4.0...v1.4.1) (2021-02-19)
 
 

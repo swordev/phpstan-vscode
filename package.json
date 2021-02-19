@@ -2,7 +2,7 @@
   "name": "phpstan",
   "displayName": "PHPStan",
   "description": "PHPStan for VSCode",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "license": "MIT",
   "publisher": "swordev",
   "author": "Juanra Gálvez <juanrgm724@gmail.com>",
