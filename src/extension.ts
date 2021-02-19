@@ -23,6 +23,7 @@ let currentProcessKilled: boolean | null
 let initTimeout: NodeJS.Timeout
 
 let config: ConfigType = null
+let configPath: string = null
 let settings: SettingsType = null
 let fileWatcherState = true
 
@@ -117,7 +118,8 @@ function getSettings(): SettingsType {
 async function init() {
 	$.fileWatcher?.dispose()
 	try {
-		config = await PHPStan.parseConfig()
+		configPath = await PHPStan.findConfigPath()
+		config = configPath ? await PHPStan.parseConfig(configPath) : null
 	} catch (error) {
 		return setStatusBarError(error, "Parse config error")
 	}

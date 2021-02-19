@@ -48,16 +48,23 @@ export class PHPStan {
 		return normalize(value)
 	}
 
-	static async parseConfig(resolve = true): Promise<ConfigType> {
+	static async findConfigPath(): Promise<string | null> {
 		const dir = PHPStan.settings.rootPath
 		for (const basename of PHPStan.settings.basenames) {
 			const path = join(dir, basename)
 			if (await checkFile(path)) {
-				const config = await parseYaml<ConfigType>(path)
-				return resolve ? PHPStan.resolveConfig(config) : config
+				return path
 			}
 		}
 		return null
+	}
+
+	static async parseConfig(
+		path: string,
+		resolve = true
+	): Promise<ConfigType> {
+		const config = await parseYaml<ConfigType>(path)
+		return resolve ? PHPStan.resolveConfig(config) : config
 	}
 
 	static resolveConfig(config: ConfigType): ConfigType {
