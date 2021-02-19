@@ -55,7 +55,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	PHPStan.settings = {
 		basenames: settings.configFileWatcherBasenames,
 		path: settings.path,
-		rootPath: vscode.workspace.rootPath,
+		rootPath: getWorkspacePath(),
 	}
 
 	$.outputChannel = vscode.window.createOutputChannel(EXT_NAME)
@@ -83,7 +83,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	if (settings.configFileWatcher) {
 		$.configFileWatcher = vscode.workspace.createFileSystemWatcher(
 			new vscode.RelativePattern(
-				vscode.workspace.rootPath,
+				PHPStan.settings.rootPath,
 				`{${settings.configFileWatcherBasenames.join(",")}}`
 			)
 		)
@@ -268,7 +268,7 @@ async function clearCacheCommand() {
 			settings.phpPath,
 			["-f", settings.path, "clear-result-cache"],
 			{
-				cwd: vscode.workspace.rootPath,
+				cwd: PHPStan.settings.rootPath,
 			}
 		)
 
@@ -302,7 +302,7 @@ async function phpstanAnalyse(args?: string[]) {
 			.concat(args ?? [])
 
 		const childProcess = (currentProcess = spawn(settings.phpPath, args, {
-			cwd: vscode.workspace.rootPath,
+			cwd: PHPStan.settings.rootPath,
 		}))
 
 		childProcess.stdout.on("data", (data: Buffer) =>
@@ -369,4 +369,9 @@ async function refreshDiagnostics(result: ResultType) {
 		}
 		$.diagnosticCollection.set(vscode.Uri.file(path), diagnostics)
 	}
+}
+
+function getWorkspacePath() {
+	const [folder] = vscode.workspace.workspaceFolders || []
+	return folder ? folder.uri.fsPath : null
 }
