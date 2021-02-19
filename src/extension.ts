@@ -357,12 +357,8 @@ async function refreshDiagnostics(result: ResultType) {
 		const pathItem = result.files[path]
 		const diagnostics: vscode.Diagnostic[] = []
 		for (const messageItem of pathItem.messages) {
-			const range = new vscode.Range(
-				messageItem.line || 0,
-				0,
-				messageItem.line || 0,
-				0
-			)
+			const line = messageItem.line ? messageItem.line - 1 : 0
+			const range = new vscode.Range(line, 0, line, 0)
 			const diagnostic = new vscode.Diagnostic(
 				range,
 				messageItem.message,
