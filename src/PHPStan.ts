@@ -16,8 +16,7 @@ export type ResultType = {
 			}[]
 		}
 	}
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	errors: any[]
+	errors: string[]
 }
 
 export type ConfigType = {

@@ -335,6 +335,24 @@ async function phpstanAnalyse(args?: string[]) {
 async function refreshDiagnostics(result: ResultType) {
 	$.diagnosticCollection.clear()
 
+	const globalDiagnostics: vscode.Diagnostic[] = []
+
+	for (const error of result.errors) {
+		const range = new vscode.Range(0, 0, 0, 0)
+		const diagnostic = new vscode.Diagnostic(
+			range,
+			error,
+			vscode.DiagnosticSeverity.Error
+		)
+		globalDiagnostics.push(diagnostic)
+	}
+
+	if (globalDiagnostics.length)
+		$.diagnosticCollection.set(
+			vscode.Uri.file(configPath),
+			globalDiagnostics
+		)
+
 	for (const path in result.files) {
 		const pathItem = result.files[path]
 		const diagnostics: vscode.Diagnostic[] = []
