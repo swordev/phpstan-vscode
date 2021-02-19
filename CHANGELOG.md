@@ -1,3 +1,12 @@
+## [1.4.1](https://github.com/swordev/phpstan-vscode/compare/v1.4.0...v1.4.1) (2021-02-19)
+
+
+### Bug Fixes
+
+* normalize message line ([81c2b38](https://github.com/swordev/phpstan-vscode/commit/81c2b38b053725315a441ef9c5cb9f9525c101fa))
+
+
+
 # [1.4.0](https://github.com/swordev/phpstan-vscode/compare/v1.3.3...v1.4.0) (2020-12-07)
 
 
