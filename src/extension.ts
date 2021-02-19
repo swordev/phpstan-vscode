@@ -89,9 +89,8 @@ export function activate(context: vscode.ExtensionContext): void {
 		)
 		onFileWatcherEvent($.configFileWatcher, async (uri, eventName) => {
 			if (!fileWatcherState) return
-			$.outputChannel.appendLine(
-				`# Config file ${eventName}: ${uri.fsPath}`
-			)
+			const fsPath = sanitizeFsPath(uri.fsPath)
+			$.outputChannel.appendLine(`# Config file ${eventName}: ${fsPath}`)
 			clearTimeout(initTimeout)
 			initTimeout = setTimeout(async () => await init(), 250)
 		})
@@ -138,8 +137,9 @@ function createFileWatcher() {
 	onFileWatcherEvent(watcher, async (uri, eventName) => {
 		if (!fileWatcherState) return
 		for (const path of config.parameters.paths) {
-			if (uri.fsPath.startsWith(path)) {
-				$.outputChannel.appendLine(`# File ${eventName}: ${uri.fsPath}`)
+			const fsPath = sanitizeFsPath(uri.fsPath)
+			if (fsPath.startsWith(path)) {
+				$.outputChannel.appendLine(`# File ${eventName}: ${fsPath}`)
 				return await analyseCommand()
 			}
 		}
@@ -232,9 +232,9 @@ async function analyseCommand(ms?: number, args?: string[]) {
 }
 
 async function analyseCurrentPathCommand(uri: vscode.Uri) {
-	const path =
+	const fsPath =
 		uri?.fsPath || vscode.window.activeTextEditor?.document.uri.fsPath
-	if (path) await analyseCommand(null, [path])
+	if (fsPath) await analyseCommand(null, [sanitizeFsPath(fsPath)])
 }
 
 function pauseFileWatcherCommand() {
@@ -381,13 +381,13 @@ async function refreshDiagnostics(result: ResultType) {
 
 function getWorkspacePath() {
 	const [folder] = vscode.workspace.workspaceFolders || []
-	return folder ? sanitizeCwd(folder.uri.fsPath) : null
+	return folder ? sanitizeFsPath(folder.uri.fsPath) : null
 }
 
 /**
  * @link https://github.com/microsoft/vscode/blob/84a3473d/src/vs/workbench/contrib/terminal/common/terminalEnvironment.ts#L227
  */
-function sanitizeCwd(path: string) {
+function sanitizeFsPath(path: string) {
 	if (process.platform === "win32" && path[1] === ":") {
 		return path[0].toUpperCase() + path.substr(1)
 	} else {
