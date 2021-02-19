@@ -58,6 +58,8 @@ export function activate(context: vscode.ExtensionContext): void {
 		rootPath: getWorkspacePath(),
 	}
 
+	if (!PHPStan.settings.rootPath) return
+
 	$.outputChannel = vscode.window.createOutputChannel(EXT_NAME)
 	$.diagnosticCollection = vscode.languages.createDiagnosticCollection(
 		EXT_NAME
