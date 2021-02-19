@@ -353,7 +353,10 @@ async function refreshDiagnostics(result: ResultType) {
 			globalDiagnostics
 		)
 
-	for (const path in result.files) {
+	// https://github.com/phpstan/phpstan-src/blob/6d228a53/src/Analyser/MutatingScope.php#L289
+	const contextRegex = / \(in context of .+\)$/
+
+	for (let path in result.files) {
 		const pathItem = result.files[path]
 		const diagnostics: vscode.Diagnostic[] = []
 		for (const messageItem of pathItem.messages) {
@@ -367,6 +370,11 @@ async function refreshDiagnostics(result: ResultType) {
 
 			diagnostics.push(diagnostic)
 		}
+
+		const matches = contextRegex.exec(path)
+
+		if (matches) path = path.slice(0, matches.index)
+
 		$.diagnosticCollection.set(vscode.Uri.file(path), diagnostics)
 	}
 }
