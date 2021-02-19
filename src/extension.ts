@@ -28,6 +28,7 @@ let settings: SettingsType = null
 let fileWatcherState = true
 
 const $: {
+	rootPath?: string
 	diagnosticCollection?: vscode.DiagnosticCollection
 	outputChannel?: vscode.OutputChannel
 	statusBarItem?: vscode.StatusBarItem
@@ -39,6 +40,7 @@ const $: {
 export function activate(context: vscode.ExtensionContext): void {
 	settings = getSettings()
 
+	$.rootPath = getWorkspacePath()
 	$.listeners = [
 		vscode.workspace.onDidChangeConfiguration((event) => {
 			if (event.affectsConfiguration(EXT_NAME)) {
@@ -48,17 +50,15 @@ export function activate(context: vscode.ExtensionContext): void {
 		}),
 	]
 
-	if (!settings.enabled) return
+	if (!settings.enabled || !$.rootPath) return
 
 	vscode.commands.executeCommand("setContext", `${EXT_NAME}:enabled`, true)
 
 	PHPStan.settings = {
 		basenames: settings.configFileWatcherBasenames,
 		path: settings.path,
-		rootPath: getWorkspacePath(),
+		rootPath: sanitizeFsPath($.rootPath),
 	}
-
-	if (!PHPStan.settings.rootPath) return
 
 	$.outputChannel = vscode.window.createOutputChannel(EXT_NAME)
 	$.diagnosticCollection = vscode.languages.createDiagnosticCollection(
@@ -85,7 +85,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	if (settings.configFileWatcher) {
 		$.configFileWatcher = vscode.workspace.createFileSystemWatcher(
 			new vscode.RelativePattern(
-				PHPStan.settings.rootPath,
+				$.rootPath,
 				`{${settings.configFileWatcherBasenames.join(",")}}`
 			)
 		)
@@ -383,7 +383,7 @@ async function refreshDiagnostics(result: ResultType) {
 
 function getWorkspacePath() {
 	const [folder] = vscode.workspace.workspaceFolders || []
-	return folder ? sanitizeFsPath(folder.uri.fsPath) : null
+	return folder ? folder.uri.fsPath : null
 }
 
 /**
