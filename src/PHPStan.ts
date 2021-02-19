@@ -11,7 +11,7 @@ export type ResultType = {
 			errors: number
 			messages: {
 				message: string
-				line: number
+				line: number | null
 				ignorable: boolean
 			}[]
 		}

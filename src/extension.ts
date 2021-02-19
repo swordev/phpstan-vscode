@@ -338,9 +338,9 @@ async function refreshDiagnostics(result: ResultType) {
 		const diagnostics: vscode.Diagnostic[] = []
 		for (const messageItem of pathItem.messages) {
 			const range = new vscode.Range(
-				messageItem.line,
+				messageItem.line || 0,
 				0,
-				messageItem.line,
+				messageItem.line || 0,
 				0
 			)
 			const diagnostic = new vscode.Diagnostic(
