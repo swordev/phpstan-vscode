@@ -1,3 +1,12 @@
+## [1.4.4](https://github.com/swordev/phpstan-vscode/compare/v1.4.1...v1.4.4) (2021-02-19)
+
+
+### Bug Fixes
+
+* avoid use satinized path as file watcher pattern ([068363b](https://github.com/swordev/phpstan-vscode/commit/068363b7458affeb7dab0d892b06aaeddfcee436))
+
+
+
 ## [1.4.3](https://github.com/swordev/phpstan-vscode/compare/v1.4.2...v1.4.3) (2021-02-19)
 
 
