@@ -1,3 +1,18 @@
+## [1.4.4](https://github.com/swordev/phpstan-vscode/compare/v1.4.1...v1.4.4) (2021-02-19)
+
+
+### Bug Fixes
+
+* avoid activate the extension if there is not a workspace opened ([e7de9e8](https://github.com/swordev/phpstan-vscode/commit/e7de9e8a6b0854b0c8b42c10218f763e4efd4354))
+* avoid use satinized path as file watcher pattern ([068363b](https://github.com/swordev/phpstan-vscode/commit/068363b7458affeb7dab0d892b06aaeddfcee436))
+* change diagnostic error line ([010dd81](https://github.com/swordev/phpstan-vscode/commit/010dd81b14b601a8d360bfcf728679939ff2d3e5))
+* diagnose global errors ([a4a1cd6](https://github.com/swordev/phpstan-vscode/commit/a4a1cd68ebe1390988fbdaed5cba498cab6a6e2e))
+* parse diagnostic path ([256048b](https://github.com/swordev/phpstan-vscode/commit/256048b0192328e5d5714194d6ee670916aa46f1))
+* sanitize all `fsPath` ([89c1460](https://github.com/swordev/phpstan-vscode/commit/89c146075f1d06af693e4fcdf176e7dbfb5e54ea))
+* sanitize workspace path ([7bd5874](https://github.com/swordev/phpstan-vscode/commit/7bd58740b07c416aefd3080374e226537d311daf))
+
+
+
 ## [1.4.3](https://github.com/swordev/phpstan-vscode/compare/v1.4.2...v1.4.3) (2021-02-19)
 
 
