@@ -139,13 +139,15 @@
     "dev": "tsc -p ./src/tsconfig.json -w",
     "lint": "eslint . --ext .ts,.js,.json",
     "lint:fix": "eslint . --ext .ts,.js,.json --fix",
-    "prepare": "npm run build && npm run lint && vsce package"
+    "prepare": "npm run build && npm run lint && vsce package",
+    "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md"
   },
   "devDependencies": {
     "@types/node": "^14.14.6",
     "@types/vscode": "^1.50.0",
     "@typescript-eslint/eslint-plugin": "^4.6.1",
     "@typescript-eslint/parser": "^4.6.1",
+    "conventional-changelog-cli": "^2.1.1",
     "eslint": "^7.13.0",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-prettier": "^3.1.4",
