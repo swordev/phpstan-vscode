@@ -1,3 +1,13 @@
+## [1.4.3](https://github.com/swordev/phpstan-vscode/compare/v1.4.2...v1.4.3) (2021-02-19)
+
+
+### Bug Fixes
+
+* avoid activate the extension if there is not a workspace opened ([60f0b85](https://github.com/swordev/phpstan-vscode/commit/e7de9e8a6b0854b0c8b42c10218f763e4efd4354))
+* sanitize all `fsPath` ([ac2f811](https://github.com/swordev/phpstan-vscode/commit/89c146075f1d06af693e4fcdf176e7dbfb5e54ea))
+
+
+
 ## [1.4.2](https://github.com/swordev/phpstan-vscode/compare/v1.4.1...v1.4.2) (2021-02-19)
 
 
