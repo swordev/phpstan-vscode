@@ -28,7 +28,8 @@ export async function checkFile(path: string): Promise<boolean> {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function parseYaml<T = any>(path: string): Promise<T> {
-	const contents = (await fs.readFile(path)).toString()
+	let contents = (await fs.readFile(path)).toString()
+	contents = contents.replace(/\t/g, "  ")
 	return parse(contents)
 }
 
