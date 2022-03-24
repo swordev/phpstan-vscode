@@ -1,6 +1,7 @@
 import * as vscode from "vscode"
 import { ChildProcessWithoutNullStreams, spawn } from "child_process"
 import { killProcess, waitForClose } from "./util"
+import { uncolorize } from "./util/color"
 import { PHPStan, ConfigType, ResultType } from "./PHPStan"
 
 type SettingsType = {
@@ -308,13 +309,13 @@ async function phpstanAnalyse(args?: string[]) {
 		}))
 
 		childProcess.stdout.on("data", (data: Buffer) =>
-			$.outputChannel.appendLine(data.toString())
+			$.outputChannel.appendLine(uncolorize(data.toString()))
 		)
 
 		childProcess.stderr.on("data", (data: Buffer) => {
 			const progress = /(\d{1,3})%\s*$/.exec(data.toString())?.[1]
 			if (progress) setStatusBarProgress(Number(progress))
-			$.outputChannel.appendLine(data.toString())
+			$.outputChannel.appendLine(uncolorize(data.toString()))
 		})
 
 		const [, stdout] = await waitForClose(childProcess)
