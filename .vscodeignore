@@ -1,6 +1,6 @@
 **
 !assets
-!lib/*.js
+!lib/**/*.js
 !README.md
 !CHANGELOG.md
 !LICENSE
