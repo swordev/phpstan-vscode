@@ -1,3 +1,14 @@
+## [1.4.6](https://github.com/swordev/phpstan-vscode/compare/v1.4.3...v1.4.6) (2022-03-25)
+
+
+### Bug Fixes
+
+* allow tab char ([23e0949](https://github.com/swordev/phpstan-vscode/commit/23e0949206fe48ed4bda1cc3f14e904107a44cc3))
+* avoid use satinized path as file watcher pattern ([068363b](https://github.com/swordev/phpstan-vscode/commit/068363b7458affeb7dab0d892b06aaeddfcee436))
+* uncolorize phpstan progress ([f34fd12](https://github.com/swordev/phpstan-vscode/commit/f34fd12763f911035adf5b37e96df45986ed0a12))
+
+
+
 ## [1.4.5](https://github.com/swordev/phpstan-vscode/compare/v1.4.4...v1.4.5) (2022-03-25)
 
 
