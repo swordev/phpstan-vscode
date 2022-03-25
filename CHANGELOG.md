@@ -1,4 +1,4 @@
-## [1.4.4](https://github.com/swordev/phpstan-vscode/compare/v1.4.1...v1.4.4) (2021-02-19)
+## [1.4.4](https://github.com/swordev/phpstan-vscode/compare/v1.4.3...v1.4.4) (2021-02-19)
 
 
 ### Bug Fixes
