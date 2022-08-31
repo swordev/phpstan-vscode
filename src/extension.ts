@@ -362,9 +362,28 @@ async function refreshDiagnostics(result: ResultType) {
 	for (let path in result.files) {
 		const pathItem = result.files[path]
 		const diagnostics: vscode.Diagnostic[] = []
+		let document: vscode.TextDocument = null
+		try {
+			document = await vscode.workspace.openTextDocument(
+				vscode.Uri.file(path)
+			)
+		} catch (error) {
+			setStatusBarError(error, "Document not found")
+		}
 		for (const messageItem of pathItem.messages) {
 			const line = messageItem.line ? messageItem.line - 1 : 0
-			const range = new vscode.Range(line, 0, line, 0)
+			let range: vscode.Range = null
+			if (document) {
+				const lineText = document?.lineAt(line)
+				range = new vscode.Range(
+					line,
+					lineText.firstNonWhitespaceCharacterIndex,
+					line,
+					lineText.range.end.character
+				)
+			} else {
+				range = new vscode.Range(line, 0, line, 0)
+			}
 			const diagnostic = new vscode.Diagnostic(
 				range,
 				messageItem.message,
