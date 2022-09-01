@@ -362,9 +362,11 @@ async function refreshDiagnostics(result: ResultType) {
 	for (let path in result.files) {
 		const pathItem = result.files[path]
 		const diagnostics: vscode.Diagnostic[] = []
+		const document = await getDocumentFromPath(path)
+
 		for (const messageItem of pathItem.messages) {
 			const line = messageItem.line ? messageItem.line - 1 : 0
-			const range = new vscode.Range(line, 0, line, 0)
+			const range = getRangeFromDocumentAndLine(document, line)
 			const diagnostic = new vscode.Diagnostic(
 				range,
 				messageItem.message,
@@ -380,6 +382,31 @@ async function refreshDiagnostics(result: ResultType) {
 
 		$.diagnosticCollection.set(vscode.Uri.file(path), diagnostics)
 	}
+}
+
+async function getDocumentFromPath(path: string) {
+	try {
+		return await vscode.workspace.openTextDocument(vscode.Uri.file(path))
+	} catch (error) {
+		setStatusBarError(error, "Document not found")
+		return null
+	}
+}
+
+function getRangeFromDocumentAndLine(
+	document: vscode.TextDocument | null,
+	line: number
+) {
+	if (!document) {
+		return new vscode.Range(line, 0, line, 0)
+	}
+	const textLine = document?.lineAt(line)
+	return new vscode.Range(
+		line,
+		textLine.firstNonWhitespaceCharacterIndex,
+		line,
+		textLine.range.end.character
+	)
 }
 
 function getWorkspacePath() {
