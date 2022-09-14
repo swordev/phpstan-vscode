@@ -36,20 +36,20 @@
   "contributes": {
     "commands": [
       {
-        "command": "phpstan.showOutput",
-        "title": "PHPStan: Show output"
-      },
-      {
         "command": "phpstan.analyse",
         "title": "PHPStan: Analyse"
       },
       {
-        "command": "phpstan.stopAnalyse",
-        "title": "PHPStan: Stop analyse"
-      },
-      {
         "command": "phpstan.analyseCurrentPath",
         "title": "PHPStan: Analyse current path"
+      },
+      {
+        "command": "phpstan.clearCache",
+        "title": "PHPStan: Clear cache"
+      },
+      {
+        "command": "phpstan.clearProblems",
+        "title": "PHPStan: Clear problems"
       },
       {
         "command": "phpstan.pauseFileWatcher",
@@ -60,16 +60,16 @@
         "title": "PHPStan: Resume file watcher"
       },
       {
+        "command": "phpstan.showOutput",
+        "title": "PHPStan: Show output"
+      },
+      {
+        "command": "phpstan.stopAnalyse",
+        "title": "PHPStan: Stop analyse"
+      },
+      {
         "command": "phpstan.toggleFileWatcher",
         "title": "PHPStan: Toggle file watcher"
-      },
-      {
-        "command": "phpstan.clearProblems",
-        "title": "PHPStan: Clear problems"
-      },
-      {
-        "command": "phpstan.clearCache",
-        "title": "PHPStan: Clear cache"
       }
     ],
     "menus": {
