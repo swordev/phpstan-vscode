@@ -44,6 +44,10 @@
         "title": "PHPStan: Analyse"
       },
       {
+        "command": "phpstan.stopAnalyse",
+        "title": "PHPStan: Stop analyse"
+      },
+      {
         "command": "phpstan.analyseCurrentPath",
         "title": "PHPStan: Analyse current path"
       },

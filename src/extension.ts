@@ -81,6 +81,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	const commands: ((...args: unknown[]) => void)[] = [
 		showOutputCommand,
 		analyseCommand,
+		stopAnalyseCommand,
 		analyseCurrentPathCommand,
 		pauseFileWatcherCommand,
 		resumeFileWatcherCommand,
@@ -278,6 +279,16 @@ async function analyseCommand(ms?: number, args?: string[]) {
 		await phpstanAnalyse(args)
 		currentProcess = currentProcessKilled = null
 	}, ms ?? settings.analysedDelay)
+}
+
+async function stopAnalyseCommand() {
+	$.outputChannel.appendLine("# Command: stop analyse")
+	if (currentProcess) {
+		currentProcessKilled = true
+		await killProcess(currentProcess)
+		clearStatusBar()
+		currentProcess = currentProcessKilled = null
+	}
 }
 
 async function analyseCurrentPathCommand(uri: vscode.Uri) {
