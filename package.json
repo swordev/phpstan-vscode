@@ -114,16 +114,9 @@
           "description": "Enables config file watcher",
           "default": true
         },
-        "phpstan.configFileWatcherBasenames": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Config file watcher basenames",
-          "default": [
-            "phpstan.neon",
-            "phpstan.neon.dist"
-          ]
+        "phpstan.configPath": {
+          "type": "string",
+          "description": "PHPStan config path"
         },
         "phpstan.analysedDelay": {
           "type": "integer",

@@ -3,14 +3,15 @@ import { ChildProcessWithoutNullStreams, spawn } from "child_process"
 import { killProcess, waitForClose } from "./util"
 import { uncolorize } from "./util/color"
 import { PHPStan, ConfigType, ResultType } from "./PHPStan"
+import { isAbsolute, join } from "path"
 
 type SettingsType = {
 	enabled: boolean
 	path: string
 	phpPath: string
+	configPath: string
 	fileWatcher: boolean
 	configFileWatcher: boolean
-	configFileWatcherBasenames: string[]
 	analysedDelay: number
 	memoryLimit: string
 }
@@ -33,10 +34,11 @@ const $: {
 	diagnosticCollection?: vscode.DiagnosticCollection
 	outputChannel?: vscode.OutputChannel
 	statusBarItem?: vscode.StatusBarItem
-	configFileWatcher?: vscode.FileSystemWatcher
-	fileWatcher?: vscode.FileSystemWatcher
+	fileWatchers: vscode.FileSystemWatcher[]
 	listeners?: vscode.Disposable[]
-} = {}
+} = {
+	fileWatchers: [],
+}
 
 export function activate(context: vscode.ExtensionContext): void {
 	settings = getSettings()
@@ -45,26 +47,35 @@ export function activate(context: vscode.ExtensionContext): void {
 	$.listeners = [
 		vscode.workspace.onDidChangeConfiguration((event) => {
 			if (event.affectsConfiguration(EXT_NAME)) {
-				deactivate()
+				$.outputChannel?.appendLine(`# Reload`)
+				deactivate({
+					exclude: ["outputChannel"],
+				})
 				activate(context)
 			}
 		}),
 	]
 
-	if (!settings.enabled || !$.rootPath) return
+	if (!settings.enabled || !$.rootPath) {
+		deactivate({
+			include: ["outputChannel"],
+		})
+		return
+	}
 
 	vscode.commands.executeCommand("setContext", `${EXT_NAME}:enabled`, true)
 
 	PHPStan.settings = {
-		basenames: settings.configFileWatcherBasenames,
 		path: settings.path,
 		rootPath: sanitizeFsPath($.rootPath),
 	}
 
-	$.outputChannel = vscode.window.createOutputChannel(EXT_NAME)
-	$.diagnosticCollection = vscode.languages.createDiagnosticCollection(
-		EXT_NAME
-	)
+	if (!$.outputChannel)
+		$.outputChannel = vscode.window.createOutputChannel(EXT_NAME)
+
+	$.outputChannel?.appendLine(`# Load`)
+	$.diagnosticCollection =
+		vscode.languages.createDiagnosticCollection(EXT_NAME)
 	$.statusBarItem = vscode.window.createStatusBarItem()
 
 	const commands: ((...args: unknown[]) => void)[] = [
@@ -83,22 +94,7 @@ export function activate(context: vscode.ExtensionContext): void {
 			vscode.commands.registerCommand(getCommandName(command), command)
 		)
 
-	if (settings.configFileWatcher) {
-		$.configFileWatcher = vscode.workspace.createFileSystemWatcher(
-			new vscode.RelativePattern(
-				$.rootPath,
-				`{${settings.configFileWatcherBasenames.join(",")}}`
-			)
-		)
-		onFileWatcherEvent($.configFileWatcher, async (uri, eventName) => {
-			if (!fileWatcherState) return
-			const fsPath = sanitizeFsPath(uri.fsPath)
-			$.outputChannel.appendLine(`# Config file ${eventName}: ${fsPath}`)
-			clearTimeout(initTimeout)
-			initTimeout = setTimeout(async () => await init(), 250)
-		})
-		init()
-	}
+	init()
 }
 
 function getSettings(): SettingsType {
@@ -109,25 +105,70 @@ function getSettings(): SettingsType {
 		enabled: get("enabled"),
 		path: get("path"),
 		phpPath: get("phpPath"),
+		configPath: get("configPath"),
 		fileWatcher: get("fileWatcher"),
 		configFileWatcher: get("configFileWatcher"),
-		configFileWatcherBasenames: get("configFileWatcherBasenames"),
 		analysedDelay: get("analysedDelay"),
 		memoryLimit: get("memoryLimit"),
 	}
 }
 
 async function init() {
-	$.fileWatcher?.dispose()
+	$.fileWatchers.map((w) => w.dispose())
+	$.fileWatchers = []
+	$.outputChannel.appendLine("# Init")
+
 	try {
-		configPath = await PHPStan.findConfigPath()
+		configPath = settings.configPath
+			? isAbsolute(settings.configPath)
+				? settings.configPath
+				: join(PHPStan.settings.rootPath, settings.configPath)
+			: await PHPStan.findConfigPath()
+	} catch (error) {
+		return setStatusBarError(error, "Config path error")
+	}
+
+	if (settings.configFileWatcher) {
+		const run = async (uri: vscode.Uri, eventName: string) => {
+			if (!fileWatcherState) return
+			const fsPath = sanitizeFsPath(uri.fsPath)
+			$.outputChannel.appendLine(`# Config file ${eventName}: ${fsPath}`)
+			clearTimeout(initTimeout)
+			initTimeout = setTimeout(async () => await init(), 250)
+		}
+
+		const configFileWatchers: typeof $.fileWatchers = []
+
+		if (settings.configPath) {
+			configFileWatchers.push(
+				vscode.workspace.createFileSystemWatcher(configPath)
+			)
+		} else {
+			configFileWatchers.push(
+				vscode.workspace.createFileSystemWatcher(
+					new vscode.RelativePattern(
+						$.rootPath,
+						`{phpstan.neon,phpstan.neon.dist}`
+					)
+				)
+			)
+		}
+
+		for (const watcher of configFileWatchers) {
+			onFileWatcherEvent(watcher, run)
+		}
+
+		$.fileWatchers.push(...configFileWatchers)
+	}
+	try {
 		config = configPath ? await PHPStan.parseConfig(configPath) : null
 	} catch (error) {
 		return setStatusBarError(error, "Parse config error")
 	}
+
 	$.outputChannel.appendLine(`# Config:\n${JSON.stringify(config, null, 2)}`)
 	if (config) {
-		if (settings.fileWatcher) $.fileWatcher = createFileWatcher()
+		if (settings.fileWatcher) $.fileWatchers.push(createFileWatcher())
 		analyseCommand(0)
 	}
 }
@@ -151,9 +192,14 @@ function createFileWatcher() {
 	return watcher
 }
 
-export function deactivate(): void {
+export function deactivate(filter: {
+	include?: (keyof typeof $)[]
+	exclude?: (keyof typeof $)[]
+}): void {
 	for (const key in $) {
 		const value = $[key]
+		if (filter.include && !filter.exclude.includes(key as never)) continue
+		if (filter.exclude && filter.exclude.includes(key as never)) continue
 		if (isDisposable(value)) {
 			value.dispose()
 		} else if (Array.isArray(value)) {
@@ -269,7 +315,13 @@ async function clearCacheCommand() {
 	try {
 		const childProcess = spawn(
 			settings.phpPath,
-			["-f", settings.path, "clear-result-cache"],
+			[
+				"-f",
+				settings.path,
+				"--",
+				"clear-result-cache",
+				...(configPath ? ["-c", configPath] : []),
+			],
 			{
 				cwd: PHPStan.settings.rootPath,
 			}
@@ -295,7 +347,13 @@ async function phpstanAnalyse(args?: string[]) {
 	setStatusBarProgress()
 
 	try {
-		args = ["-f", settings.path, "analyse"]
+		args = [
+			"-f",
+			settings.path,
+			"--",
+			"analyse",
+			...(configPath ? ["-c", configPath] : []),
+		]
 			.concat(
 				settings.memoryLimit
 					? ["--memory-limit=" + settings.memoryLimit]

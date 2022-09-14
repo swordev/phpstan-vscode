@@ -30,7 +30,6 @@ export type ConfigType = {
 export class PHPStan {
 	static settings: {
 		rootPath: string
-		basenames: string[]
 		path: string
 	}
 
@@ -49,7 +48,8 @@ export class PHPStan {
 
 	static async findConfigPath(): Promise<string | null> {
 		const dir = PHPStan.settings.rootPath
-		for (const basename of PHPStan.settings.basenames) {
+		const baseNames = ["phpstan.neon", "phpstan.neon.dist"]
+		for (const basename of baseNames) {
 			const path = join(dir, basename)
 			if (await checkFile(path)) {
 				return path
