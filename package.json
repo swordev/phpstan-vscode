@@ -132,11 +132,10 @@
   },
   "scripts": {
     "publish": "vsce publish",
-    "build": "rimraf lib/* && tsc -p ./src/tsconfig.json",
-    "dev": "tsc -p ./src/tsconfig.json -w",
-    "lint": "eslint . --ext .ts,.js,.json",
-    "lint:fix": "eslint . --ext .ts,.js,.json --fix",
-    "prepare": "npm run build && npm run lint && vsce package",
+    "build": "tsc",
+    "watch": "tsc -w",
+    "check:lint": "eslint --cache . --ext .ts,.js,.json",
+    "prepare": "npm run build && npm run check:lint && vsce package",
     "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md"
   },
   "devDependencies": {

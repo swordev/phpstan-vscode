@@ -1,4 +1,5 @@
+.eslintcache
 .history
+*.vsix
 lib
 node_modules
-*.vsix
