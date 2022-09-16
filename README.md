@@ -15,16 +15,16 @@
 - Shows all PHPStan problems of the whole project.
 - Parses PHPStan config for file watching.
 - Commands:
-    - `phpstan.showOutput`: show output.
-    - `phpstan.analyse`: analyse.
-    - `phpstan.analyseCurrentPath`: analyse current path.
-        - Also available in the explorer context menu.
-    - `phpstan.pauseFileWatcher`: pause file watcher.
-    - `phpstan.resumeFileWatcher`: resume file watcher.
-    - `phpstan.toggleFileWatcher`: toggle file watcher.
-    - `phpstan.clearProblems`: clear problems.
-    - `phpstan.clearCache`: clear cache.
-    
+  - `phpstan.showOutput`: show output.
+  - `phpstan.analyse`: analyse.
+  - `phpstan.analyseCurrentPath`: analyse current path.
+    - Also available in the explorer context menu.
+  - `phpstan.pauseFileWatcher`: pause file watcher.
+  - `phpstan.resumeFileWatcher`: resume file watcher.
+  - `phpstan.toggleFileWatcher`: toggle file watcher.
+  - `phpstan.clearProblems`: clear problems.
+  - `phpstan.clearCache`: clear cache.
+
 ## Usage
 
 1. Install [PHPStan extension](https://marketplace.visualstudio.com/items?itemName=swordev.phpstan).
