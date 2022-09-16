@@ -134,6 +134,8 @@
     "publish": "vsce publish",
     "build": "tsc",
     "watch": "tsc -w",
+    "format": "prettier --cache -w .",
+    "check:format": "prettier --cache -c .",
     "check:lint": "eslint --cache . --ext .ts,.js,.json",
     "prepare": "npm run build && npm run check:lint && vsce package",
     "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md"
@@ -145,8 +147,6 @@
     "@typescript-eslint/parser": "^4.6.1",
     "conventional-changelog-cli": "^2.1.1",
     "eslint": "^7.13.0",
-    "eslint-config-prettier": "^6.15.0",
-    "eslint-plugin-prettier": "^3.1.4",
     "prettier": "2.1.2",
     "rimraf": "^3.0.2",
     "typescript": "^4.0.5",
