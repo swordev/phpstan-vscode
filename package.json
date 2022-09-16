@@ -1,15 +1,8 @@
 {
   "name": "phpstan",
   "displayName": "PHPStan",
-  "description": "PHPStan for VSCode",
   "version": "1.4.6",
-  "license": "MIT",
-  "publisher": "swordev",
-  "author": "Juanra Gálvez <juanrgm724@gmail.com>",
-  "icon": "assets/logo.png",
-  "engines": {
-    "vscode": "^1.50.0"
-  },
+  "description": "PHPStan for VSCode",
   "categories": [
     "Linters",
     "Programming Languages"
@@ -22,17 +15,27 @@
     "errors",
     "analyse"
   ],
-  "activationEvents": [
-    "*"
-  ],
+  "bugs": {
+    "url": "https://github.com/swordev/phpstan-vscode/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/swordev/phpstan-vscode.git"
   },
-  "bugs": {
-    "url": "https://github.com/swordev/phpstan-vscode/issues"
-  },
+  "license": "MIT",
+  "author": "Juanra Gálvez <juanrgm724@gmail.com>",
+  "publisher": "swordev",
   "main": "./lib/extension.js",
+  "scripts": {
+    "build": "tsc",
+    "check:format": "prettier --cache -c .",
+    "check:lint": "eslint --cache . --ext .ts,.js,.json",
+    "format": "prettier --cache -w .",
+    "prepare": "npm run build && npm run check:lint && vsce package",
+    "publish": "vsce publish",
+    "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md",
+    "watch": "tsc -w"
+  },
   "contributes": {
     "commands": [
       {
@@ -72,18 +75,6 @@
         "title": "PHPStan: Toggle file watcher"
       }
     ],
-    "menus": {
-      "explorer/context": [
-        {
-          "command": "phpstan.analyseCurrentPath",
-          "when": "resourceLangId == php && phpstan:enabled"
-        },
-        {
-          "command": "phpstan.analyseCurrentPath",
-          "when": "explorerResourceIsFolder && phpstan:enabled"
-        }
-      ]
-    },
     "configuration": {
       "type": "object",
       "title": "PHPStan",
@@ -128,17 +119,25 @@
           "default": 200
         }
       }
+    },
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "phpstan.analyseCurrentPath",
+          "when": "resourceLangId == php && phpstan:enabled"
+        },
+        {
+          "command": "phpstan.analyseCurrentPath",
+          "when": "explorerResourceIsFolder && phpstan:enabled"
+        }
+      ]
     }
   },
-  "scripts": {
-    "publish": "vsce publish",
-    "build": "tsc",
-    "watch": "tsc -w",
-    "format": "prettier --cache -w .",
-    "check:format": "prettier --cache -c .",
-    "check:lint": "eslint --cache . --ext .ts,.js,.json",
-    "prepare": "npm run build && npm run check:lint && vsce package",
-    "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md"
+  "activationEvents": [
+    "*"
+  ],
+  "dependencies": {
+    "yaml": "^2.1.1"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^3.3.0",
@@ -155,7 +154,8 @@
     "typescript": "^4.8.3",
     "vsce": "^1.50.0"
   },
-  "dependencies": {
-    "yaml": "^2.1.1"
-  }
+  "engines": {
+    "vscode": "^1.50.0"
+  },
+  "icon": "assets/logo.png"
 }

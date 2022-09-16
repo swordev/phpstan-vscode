@@ -1,6 +1,4 @@
 {
-  "root": true,
-  "parser": "@typescript-eslint/parser",
   "env": {
     "node": true
   },
@@ -8,5 +6,7 @@
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended"
-  ]
+  ],
+  "parser": "@typescript-eslint/parser",
+  "root": true
 }

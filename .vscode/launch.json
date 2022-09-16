@@ -1,5 +1,4 @@
 {
-  "version": "0.2.0",
   "configurations": [
     {
       "name": "Run Extension",
@@ -8,5 +7,6 @@
       "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
       "outFiles": ["${workspaceFolder}/lib/**/*.js"]
     }
-  ]
+  ],
+  "version": "0.2.0"
 }
