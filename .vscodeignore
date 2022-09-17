@@ -1,7 +1,6 @@
 **
 !assets
-!lib/**/*.js
+!dist
 !README.md
 !CHANGELOG.md
 !LICENSE
-!node_modules

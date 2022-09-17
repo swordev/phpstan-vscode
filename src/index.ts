@@ -4,6 +4,7 @@ import findPHPStanConfigPath from "./commands/findPHPStanConfigPath";
 import loadPHPStanConfig from "./commands/loadPHPStanConfig";
 import { EXT_NAME, getSettings } from "./settings";
 import { State } from "./state";
+import { getFunctionName } from "./utils/function";
 import { sanitizeFsPath } from "./utils/path";
 import { getCommandName } from "./utils/self/command";
 import { setStatusBarError } from "./utils/self/statusBar";
@@ -57,7 +58,7 @@ async function safeCall(cb: () => unknown, name?: string) {
   } catch (error) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const e: Error = error as any;
-    setStatusBarError($, error, name ?? cb.name);
+    setStatusBarError($, error, name ?? getFunctionName(cb));
     $.vscode.outputChannel.appendLine(`# Error: ${e.stack ?? e.message ?? e}`);
   }
 }
@@ -150,7 +151,7 @@ export function activate(context: ExtensionContext): void {
   for (const command of commands)
     $.vscode.listeners.push(
       cmd.registerCommand(getCommandName(command), () => {
-        safeCall(() => command($), command.name);
+        safeCall(() => command($), getFunctionName(command));
       })
     );
 
@@ -164,7 +165,7 @@ export function deactivate(filter: {
   const cb = (v: Disposable) => {
     if (filter.include && !filter.include.includes(v)) return false;
     if (filter.exclude && filter.exclude.includes(v)) return false;
-    v.dispose();
+    v?.dispose();
     return true;
   };
 

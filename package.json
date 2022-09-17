@@ -25,16 +25,21 @@
   "license": "MIT",
   "author": "Juanra Gálvez <juanrgm724@gmail.com>",
   "publisher": "swordev",
-  "main": "./lib/extension.js",
+  "main": "./dist/index.js",
+  "files": [
+    "assets",
+    "dist"
+  ],
   "scripts": {
-    "build": "tsc",
+    "build": "vite build",
+    "check": "npm run check:format && npm run check:lint",
     "check:format": "prettier --cache -c .",
     "check:lint": "eslint --cache . --ext .ts,.js,.json",
     "format": "prettier --cache -w .",
-    "prepare": "npm run build && npm run check:lint && vsce package",
+    "prepare": "npm run build && npm run check && vsce package --no-dependencies",
     "publish": "vsce publish",
-    "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md",
-    "watch": "tsc -w"
+    "start": "vite build --watch",
+    "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md"
   },
   "contributes": {
     "commands": [
@@ -151,7 +156,8 @@
     "prettier-plugin-packagejson": "^2.2.18",
     "prettier-plugin-sort-json": "^0.0.3",
     "rimraf": "^3.0.2",
-    "typescript": "^4.8.3",
+    "vite": "^3.1.2",
+    "vite-plugin-checker": "^0.5.1",
     "vsce": "^1.50.0"
   },
   "engines": {
