@@ -1,5 +1,5 @@
 {
-  "name": "phpstan",
+  "name": "phpstan-vscode",
   "displayName": "PHPStan",
   "version": "1.4.6",
   "description": "PHPStan for VSCode",
@@ -31,15 +31,14 @@
     "dist"
   ],
   "scripts": {
-    "build": "vite build",
+    "build": "pnpm build:src && pnpm build:vsce",
+    "build:src": "vite build",
+    "build:vsce": "node scripts/build-vsce.mjs",
     "check": "pnpm check:format && pnpm check:lint",
     "check:format": "prettier --cache -c .",
     "check:lint": "eslint --cache . --ext .ts,.js,.json",
     "format": "prettier --cache -w .",
-    "prepare": "pnpm build && pnpm check && vsce package --no-dependencies",
-    "publish": "vsce publish",
-    "start": "vite build --watch",
-    "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md"
+    "start": "vite build --watch"
   },
   "contributes": {
     "commands": [
@@ -145,12 +144,13 @@
     "yaml": "^2.1.1"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.4.6",
+    "@changesets/cli": "^2.24.4",
     "@trivago/prettier-plugin-sort-imports": "^3.3.0",
     "@types/node": "^18.7.18",
     "@types/vscode": "^1.50.0",
     "@typescript-eslint/eslint-plugin": "^5.37.0",
     "@typescript-eslint/parser": "^5.37.0",
-    "conventional-changelog-cli": "^2.2.2",
     "eslint": "^8.23.1",
     "prettier": "2.7.1",
     "prettier-plugin-packagejson": "^2.2.18",
