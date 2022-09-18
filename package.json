@@ -138,7 +138,9 @@
     }
   },
   "activationEvents": [
-    "*"
+    "onLanguage:php",
+    "workspaceContains:**/phpstan.neon",
+    "workspaceContains:**/phpstan.neon.dist"
   ],
   "dependencies": {
     "yaml": "^2.1.1"
