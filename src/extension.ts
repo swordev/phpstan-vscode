@@ -199,11 +199,7 @@ export class Ext<
 
     if (this.settings.configFileWatcher)
       this.fileWatchers.register(
-        this.settings.configPath ??
-          new RelativePattern(
-            getWorkspacePath(),
-            `{phpstan.neon,phpstan.neon.dist}`
-          ),
+        new RelativePattern(getWorkspacePath(), this.settings.configPath),
         (uri, eventName) => {
           if (!this.store.fileWatcher.enabled) return;
           const path = sanitizeFsPath(uri.fsPath);

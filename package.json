@@ -115,7 +115,8 @@
         },
         "phpstan.configPath": {
           "type": "string",
-          "description": "PHPStan config path"
+          "description": "PHPStan config path",
+          "default": "{phpstan.neon,phpstan.neon.dist}"
         },
         "phpstan.analysedDelay": {
           "type": "integer",

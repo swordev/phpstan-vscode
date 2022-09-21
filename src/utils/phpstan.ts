@@ -1,7 +1,5 @@
-import { checkFile } from "./fs";
 import { parseNeonFile } from "./neon";
 import { resolvePath } from "./path";
-import { join } from "path";
 
 export type PHPStanAnalyseResult = {
   totals: {
@@ -47,18 +45,6 @@ export async function parsePHPStanConfigFile(
 ): Promise<PHPStanConfig> {
   const config = await parseNeonFile<PHPStanConfig>(path, env);
   return normalizePHPStanConfig(config, env.currentWorkingDirectory);
-}
-
-export async function findPHPStanConfigPath(
-  cwd: string
-): Promise<string | undefined> {
-  const baseNames = ["phpstan.neon", "phpstan.neon.dist"];
-  for (const basename of baseNames) {
-    const path = join(cwd, basename);
-    if (await checkFile(path)) {
-      return path;
-    }
-  }
 }
 
 export function normalizePHPStanConfig(

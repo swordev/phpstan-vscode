@@ -1,16 +1,15 @@
 import { Ext } from "../extension";
-import { findPHPStanConfigPath as find } from "../utils/phpstan";
-import { isAbsolute, join } from "path";
+import { RelativePattern, workspace } from "vscode";
 
 export default async function findPHPStanConfigPath(ext: Ext) {
   const { settings, cwd } = ext;
-  const configPath = settings.configPath
-    ? isAbsolute(settings.configPath)
-      ? settings.configPath
-      : join(cwd, settings.configPath)
-    : await find(ext.cwd);
-
-  if (!configPath) throw new Error(`Config path not found.`);
+  const [configUri] = await workspace.findFiles(
+    new RelativePattern(cwd, settings.configPath),
+    null,
+    1
+  );
+  if (!configUri) throw new Error(`Config path not found.`);
+  const configPath = configUri.fsPath;
   ext.log({ tag: "configPath", message: configPath });
   return configPath;
 }
