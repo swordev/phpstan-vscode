@@ -1,5 +1,5 @@
-import { State } from "../state";
+import { Ext } from "../extension";
 
-export default function showOutput($: State) {
-  $.vscode.outputChannel.show();
+export default function showOutput(ext: Ext) {
+  ext.outputChannel.show();
 }

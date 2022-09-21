@@ -1,27 +1,28 @@
-import { State } from "../state";
-import { uncolorize } from "../utils/color";
+import { Ext } from "../extension";
 import {
   parsePHPStanAnalyseResult,
   PHPStanAnalyseResult,
 } from "../utils/phpstan";
-import { killProcess, waitForClose } from "../utils/process";
-import { getCommandName } from "../utils/self/command";
-import { clearStatusBar, setStatusBarError } from "../utils/self/statusBar";
+import { waitForClose } from "../utils/process";
 import showOutput from "./showOutput";
+import stopAnalyse from "./stopAnalyse";
 import { spawn } from "child_process";
 import { Diagnostic, DiagnosticSeverity, Range, Uri } from "vscode";
 
-function setStatusBarProgress($: State, progress?: number) {
+function setStatusBarProgress(ext: Ext, progress?: number) {
+  const { statusBarItem } = ext;
   let text = "$(sync~spin) PHPStan analysing...";
   if (!!progress && progress > 0) text += ` (${progress}%)`;
-  $.vscode.statusBarItem.text = text;
-  $.vscode.statusBarItem.tooltip = "";
-  $.vscode.statusBarItem.command = getCommandName(showOutput);
-  $.vscode.statusBarItem.show();
+
+  statusBarItem.text = text;
+  statusBarItem.tooltip = "";
+  statusBarItem.command = ext.getCommandName(showOutput);
+  statusBarItem.show();
 }
 
-async function refreshDiagnostics($: State, result: PHPStanAnalyseResult) {
-  $.vscode.diagnostic.clear();
+async function refreshDiagnostics(ext: Ext, result: PHPStanAnalyseResult) {
+  const { diagnostic } = ext;
+  diagnostic.clear();
 
   const globalDiagnostics: Diagnostic[] = [];
 
@@ -32,8 +33,8 @@ async function refreshDiagnostics($: State, result: PHPStanAnalyseResult) {
   }
 
   if (globalDiagnostics.length) {
-    $.vscode.diagnostic.set(
-      Uri.file($.phpstan.configPath ?? "."),
+    ext.diagnostic.set(
+      Uri.file(ext.store.phpstan.configPath ?? "."),
       globalDiagnostics
     );
   }
@@ -60,69 +61,56 @@ async function refreshDiagnostics($: State, result: PHPStanAnalyseResult) {
 
     if (matches) path = path.slice(0, matches.index);
 
-    $.vscode.diagnostic.set(Uri.file(path), diagnostics);
+    diagnostic.set(Uri.file(path), diagnostics);
   }
 }
 
-async function rutine($: State, args?: string[]) {
-  setStatusBarProgress($);
+async function rutine(ext: Ext, args?: string[]) {
+  setStatusBarProgress(ext);
 
-  try {
-    args = [
+  const childProcess = (ext.store.analyse.process = spawn(
+    ext.settings.phpPath,
+    [
       "-f",
-      $.settings.path,
+      ext.settings.path,
       "--",
       "analyse",
-      ...($.phpstan.configPath ? ["-c", $.phpstan.configPath] : []),
-    ]
-      .concat(
-        $.settings.memoryLimit
-          ? ["--memory-limit=" + $.settings.memoryLimit]
-          : []
-      )
-      .concat(["--error-format=json"])
-      .concat(args ?? []);
-
-    const childProcess = ($.process.instance = spawn($.settings.phpPath, args, {
-      cwd: $.phpstan.settings.rootPath,
-    }));
-
-    childProcess.stdout.on("data", (data: Buffer) =>
-      $.vscode.outputChannel.appendLine(uncolorize(data.toString()))
-    );
-
-    childProcess.stderr.on("data", (data: Buffer) => {
-      const progress = /(\d{1,3})%\s*$/.exec(data.toString())?.[1];
-      if (progress) setStatusBarProgress($, Number(progress));
-      $.vscode.outputChannel.appendLine(uncolorize(data.toString()));
-    });
-
-    const [, stdout] = await waitForClose(childProcess);
-
-    if ($.process.killed) {
-      $.process.killed = false;
-      return;
+      ...(ext.store.phpstan.configPath
+        ? ["-c", ext.store.phpstan.configPath]
+        : []),
+      ...(ext.settings.memoryLimit
+        ? [`--memory-limit=${ext.settings.memoryLimit}`]
+        : []),
+      "--error-format=json",
+      ...(args ?? []),
+    ],
+    {
+      cwd: ext.cwd,
     }
+  ));
 
-    const phpstanResult = parsePHPStanAnalyseResult(stdout);
+  childProcess.stdout.on("data", (buffer: Buffer) => ext.log(buffer));
 
-    refreshDiagnostics($, phpstanResult);
-  } catch (error) {
-    return setStatusBarError($, error, "Spawn error");
-  }
+  childProcess.stderr.on("data", (buffer: Buffer) => {
+    const progress = /(\d{1,3})%\s*$/.exec(buffer.toString())?.[1];
+    if (progress) setStatusBarProgress(ext, Number(progress));
+    ext.log(buffer);
+  });
 
-  clearStatusBar($);
+  const [, stdout] = await waitForClose(childProcess);
+
+  ext.store.analyse.process = undefined;
+
+  const phpstanResult = parsePHPStanAnalyseResult(stdout);
+
+  refreshDiagnostics(ext, phpstanResult);
+
+  ext.clearStatusBar();
 }
 
-export async function analyse($: State, ms?: number, args?: string[]) {
-  if ($.process.timeout) clearTimeout($.process.timeout);
-  $.process.timeout = setTimeout(async () => {
-    $.vscode.outputChannel.appendLine("# Command: analyse");
-    if ($.process.instance) {
-      $.process.killed = true;
-      await killProcess($.process.instance);
-    }
-    await rutine($, args);
-    $.process.instance = $.process.killed = null;
-  }, ms ?? $.settings.analysedDelay);
+export default async function analyse(ext: Ext, ms?: number, args?: string[]) {
+  await stopAnalyse(ext);
+  ext.store.analyse.timeout(async () => {
+    await rutine(ext, args);
+  }, ms ?? ext.settings.analysedDelay);
 }

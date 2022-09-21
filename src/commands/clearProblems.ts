@@ -1,5 +1,5 @@
-import { State } from "../state";
+import { Ext } from "../extension";
 
-export default function clearProblems($: State) {
-  $.vscode.diagnostic.clear();
+export default function clearProblems(ext: Ext) {
+  ext.diagnostic.clear();
 }

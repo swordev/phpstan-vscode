@@ -1,13 +1,10 @@
-import { State } from "../state";
+import { Ext } from "../extension";
 import { killProcess } from "../utils/process";
-import { clearStatusBar } from "../utils/self/statusBar";
 
-export default async function stopAnalyse($: State) {
-  $.vscode.outputChannel.appendLine("# Command: stop analyse");
-  if ($.process.instance) {
-    $.process.killed = true;
-    await killProcess($.process.instance);
-    clearStatusBar($);
-    $.process.instance = $.process.killed = null;
+export default async function stopAnalyse(ext: Ext) {
+  if (ext.store.analyse.process) {
+    await killProcess(ext.store.analyse.process);
+    ext.clearStatusBar();
+    ext.store.analyse.process = undefined;
   }
 }

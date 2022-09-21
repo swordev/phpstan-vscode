@@ -1,4 +1,4 @@
-import { analyse } from "./analyse";
+import analyse from "./analyse";
 import analyseCurrentPath from "./analyseCurrentPath";
 import { clearCache } from "./clearCache";
 import clearProblems from "./clearProblems";
@@ -10,7 +10,7 @@ import showOutput from "./showOutput";
 import stopAnalyse from "./stopAnalyse";
 import toggleFileWatcher from "./toggleFileWatcher";
 
-export const commands = [
+export const commands = {
   analyse,
   analyseCurrentPath,
   clearCache,
@@ -22,5 +22,5 @@ export const commands = [
   showOutput,
   stopAnalyse,
   toggleFileWatcher,
-];
+};
 export default commands;

@@ -1,25 +1,12 @@
-import { State } from "../state";
-import {
-  findPHPStanConfigPath,
-  parsePHPStanConfig,
-  PHPStanConfig,
-} from "../utils/phpstan";
-import { setStatusBarError } from "../utils/self/statusBar";
-import { isAbsolute, join } from "path";
+import { Ext } from "../extension";
+import { parsePHPStanConfig } from "../utils/phpstan";
 
-export default async function loadPHPStanConfig($: State) {
-  if (!$.phpstan.configPath)
-    return setStatusBarError(
-      $,
-      new Error("Config path is required"),
-      "Parse config error"
-    );
-  const config = await parsePHPStanConfig(
-    $.phpstan.configPath,
-    $.phpstan.settings
-  );
-  $.vscode.outputChannel.appendLine(
-    `# Config:\n${JSON.stringify(config, null, 2)}`
-  );
-  return true;
+export default async function loadPHPStanConfig(ext: Ext) {
+  if (!ext.store.phpstan.configPath) throw new Error("Config path is required");
+  const config = await parsePHPStanConfig(ext.store.phpstan.configPath, {
+    cwd: ext.cwd,
+    binPath: ext.settings.path,
+  });
+  ext.outputChannel.appendLine(`# Config:\n${JSON.stringify(config, null, 2)}`);
+  return config;
 }

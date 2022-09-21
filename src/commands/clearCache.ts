@@ -1,49 +1,37 @@
-import { State } from "../state";
+import { Ext } from "../extension";
 import { waitForClose } from "../utils/process";
-import { getCommandName } from "../utils/self/command";
-import { clearStatusBar } from "../utils/self/statusBar";
 import showOutput from "./showOutput";
 import { spawn } from "child_process";
 
-export async function clearCache($: State) {
-  $.vscode.outputChannel.appendLine("# Command: clearCache");
+export async function clearCache(ext: Ext) {
+  const { statusBarItem, settings } = ext;
 
-  $.vscode.statusBarItem.text = "$(sync~spin) PHPStan clearing cache...";
-  $.vscode.statusBarItem.tooltip = "";
-  $.vscode.statusBarItem.command = getCommandName(showOutput);
-  $.vscode.statusBarItem.show();
+  statusBarItem.text = "$(sync~spin) PHPStan clearing cache...";
+  statusBarItem.tooltip = "";
+  statusBarItem.command = ext.getCommandName(showOutput);
+  statusBarItem.show();
 
-  try {
-    const childProcess = spawn(
-      $.settings.phpPath,
-      [
-        "-f",
-        $.settings.path,
-        "--",
-        "clear-result-cache",
-        ...($.phpstan.configPath ? ["-c", $.phpstan.configPath] : []),
-      ],
-      {
-        cwd: $.phpstan.settings.rootPath,
-      }
-    );
+  const childProcess = spawn(
+    settings.phpPath,
+    [
+      "-f",
+      settings.path,
+      "--",
+      "clear-result-cache",
+      ...(ext.store.phpstan.configPath
+        ? ["-c", ext.store.phpstan.configPath]
+        : []),
+    ],
+    {
+      cwd: ext.cwd,
+    }
+  );
 
-    childProcess.stdout.on("data", (data: Buffer) =>
-      $.vscode.outputChannel.appendLine(data.toString())
-    );
+  childProcess.stdout.on("data", (buffer: Buffer) => ext.log(buffer));
 
-    childProcess.stderr.on("data", (data: Buffer) => {
-      $.vscode.outputChannel.appendLine(data.toString());
-    });
+  childProcess.stderr.on("data", (buffer: Buffer) => {
+    ext.log(buffer);
+  });
 
-    await waitForClose(childProcess);
-  } catch (error) {
-    $.vscode.outputChannel.appendLine(
-      error instanceof Error
-        ? error.stack || error.message
-        : `Unknown error: ${error}`
-    );
-  }
-
-  clearStatusBar($);
+  await waitForClose(childProcess);
 }

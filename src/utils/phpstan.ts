@@ -21,25 +21,25 @@ export type PHPStanAnalyseResult = {
 };
 
 export type PHPStanConfig = {
-  parameters: {
-    paths: string[];
-    excludes_analyse: string[];
-    fileExtensions: string[];
+  parameters?: {
+    paths?: string[];
+    excludes_analyse?: string[];
+    fileExtensions?: string[];
   };
 };
 
 export type PHPStanSettings = {
-  rootPath: string;
-  path: string;
+  binPath: string;
+  cwd: string;
 };
 
 function resolveConfigItemValue(
   value: string,
   settings: PHPStanSettings
 ): string {
-  const rootDir = join(settings.rootPath, settings.path);
+  const rootDir = join(settings.cwd, settings.binPath);
   return value
-    .replace(/%currentWorkingDirectory%/g, settings.rootPath)
+    .replace(/%currentWorkingDirectory%/g, settings.cwd)
     .replace(/%rootDir%/g, rootDir);
 }
 
@@ -48,7 +48,7 @@ function resolveConfigItemPath(
   settings: PHPStanSettings
 ): string {
   value = resolveConfigItemValue(value, settings);
-  if (!isAbsolute(value)) value = join(settings.rootPath, value);
+  if (!isAbsolute(value)) value = join(settings.cwd, value);
   return normalize(value);
 }
 
@@ -70,7 +70,7 @@ export async function parsePHPStanConfig(
 export async function findPHPStanConfigPath(
   settings: PHPStanSettings
 ): Promise<string | undefined> {
-  const dir = settings.rootPath;
+  const dir = settings.cwd;
   const baseNames = ["phpstan.neon", "phpstan.neon.dist"];
   for (const basename of baseNames) {
     const path = join(dir, basename);
@@ -93,10 +93,6 @@ export function resolvePHPStanConfig(
     params.excludes_analyse = params.excludes_analyse.map((v) =>
       resolveConfigItemPath(v, settings)
     );
-
-  if (!Array.isArray(params.fileExtensions)) params.fileExtensions = [];
-
-  if (!params.fileExtensions.length) params.fileExtensions.push("php");
 
   return config;
 }

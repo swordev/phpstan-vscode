@@ -1,11 +1,11 @@
-import { State } from "../state";
-import { getCommandName } from "../utils/self/command";
+import { Ext } from "../extension";
 import resumeFileWatcher from "./resumeFileWatcher";
 
-export default function pauseFileWatcher($: State) {
-  $.fileWatcherState = false;
-  $.vscode.statusBarItem.text = "$(debug-pause) PHPStan";
-  $.vscode.statusBarItem.tooltip = "Resume file watcher";
-  $.vscode.statusBarItem.command = getCommandName(resumeFileWatcher);
-  $.vscode.statusBarItem.show();
+export default function pauseFileWatcher(ext: Ext) {
+  const { statusBarItem } = ext;
+  ext.store.fileWatcher.enabled = false;
+  statusBarItem.text = "$(debug-pause) PHPStan";
+  statusBarItem.tooltip = "Resume file watcher";
+  statusBarItem.command = ext.getCommandName(resumeFileWatcher);
+  statusBarItem.show();
 }
