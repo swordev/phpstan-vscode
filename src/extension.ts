@@ -102,15 +102,18 @@ export class Ext<
     }
   }
 
-  log(data: string | Buffer | Error) {
+  log(data: { tag: string; message: string } | string | Buffer | Error) {
     if (typeof data === "string") {
       this.outputChannel.appendLine(data);
     } else if (data instanceof Error) {
-      this.outputChannel.appendLine(
-        `# [error] ${data.stack ?? data.message ?? data}`
-      );
-    } else {
+      this.log({
+        tag: "error",
+        message: `${data.stack ?? data.message ?? data}`,
+      });
+    } else if (Buffer.isBuffer(data)) {
       this.outputChannel.appendLine(uncolorize(data.toString()));
+    } else {
+      this.outputChannel.appendLine(`# [${data.tag}] ${data.message}`);
     }
   }
 
@@ -124,7 +127,7 @@ export class Ext<
 
   async call(cb: () => unknown, name = getFunctionName(cb)) {
     try {
-      this.log(`[call:${name}]`);
+      this.log({ tag: "call", message: name });
       return await cb();
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -197,11 +200,17 @@ export class Ext<
     if (this.settings.configFileWatcher)
       this.fileWatchers.register(
         this.settings.configPath ??
-          new RelativePattern(this.cwd, `{phpstan.neon,phpstan.neon.dist}`),
+          new RelativePattern(
+            getWorkspacePath(),
+            `{phpstan.neon,phpstan.neon.dist}`
+          ),
         (uri, eventName) => {
           if (!this.store.fileWatcher.enabled) return;
           const path = sanitizeFsPath(uri.fsPath);
-          this.log(`[event:${eventName}] ${path}`);
+          this.log({
+            tag: `event:${eventName}`,
+            message: path,
+          });
           this.store.reactivate.timeout(() => this.reactivate());
         }
       );
@@ -214,7 +223,10 @@ export class Ext<
         for (const patternPath of config.parameters?.paths || []) {
           const path = sanitizeFsPath(uri.fsPath);
           if (path.startsWith(patternPath)) {
-            this.log(`[event:${eventName}] ${path}`);
+            this.log({
+              tag: `event:${eventName}`,
+              message: path,
+            });
             return await this.options.commands.analyse(this);
           }
         }

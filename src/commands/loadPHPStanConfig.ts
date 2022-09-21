@@ -8,6 +8,6 @@ export default async function loadPHPStanConfig(ext: Ext) {
     currentWorkingDirectory: ext.cwd,
     rootDir: normalize(dirname(join(ext.cwd, ext.settings.path))),
   });
-  ext.outputChannel.appendLine(`# Config:\n${JSON.stringify(config, null, 2)}`);
+  ext.log({ tag: "config", message: JSON.stringify(config, null, 2) });
   return config;
 }
