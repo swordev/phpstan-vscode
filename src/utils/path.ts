@@ -1,3 +1,5 @@
+import { isAbsolute, join, normalize } from "path";
+
 /**
  * @link https://github.com/microsoft/vscode/blob/84a3473d/src/vs/workbench/contrib/terminal/common/terminalEnvironment.ts#L227
  */
@@ -7,4 +9,9 @@ export function sanitizeFsPath(path: string) {
   } else {
     return path;
   }
+}
+
+export function resolvePath(path: string, cwd: string): string {
+  if (!isAbsolute(path)) path = join(cwd, path);
+  return normalize(path);
 }

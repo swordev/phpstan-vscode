@@ -1,6 +1,7 @@
 import { checkFile } from "./fs";
-import { parseYamlFile } from "./yaml";
-import { isAbsolute, join, normalize } from "path";
+import { parseNeonFile } from "./neon";
+import { resolvePath } from "./path";
+import { join } from "path";
 
 export type PHPStanAnalyseResult = {
   totals: {
@@ -25,32 +26,14 @@ export type PHPStanConfig = {
     paths?: string[];
     excludes_analyse?: string[];
     fileExtensions?: string[];
+    bootstrapFiles?: string[];
   };
 };
 
-export type PHPStanSettings = {
-  binPath: string;
-  cwd: string;
+export type PHPStanConfigEnv = {
+  rootDir: string;
+  currentWorkingDirectory: string;
 };
-
-function resolveConfigItemValue(
-  value: string,
-  settings: PHPStanSettings
-): string {
-  const rootDir = join(settings.cwd, settings.binPath);
-  return value
-    .replace(/%currentWorkingDirectory%/g, settings.cwd)
-    .replace(/%rootDir%/g, rootDir);
-}
-
-function resolveConfigItemPath(
-  value: string,
-  settings: PHPStanSettings
-): string {
-  value = resolveConfigItemValue(value, settings);
-  if (!isAbsolute(value)) value = join(settings.cwd, value);
-  return normalize(value);
-}
 
 export function parsePHPStanAnalyseResult(
   stdout: string
@@ -58,41 +41,38 @@ export function parsePHPStanAnalyseResult(
   return JSON.parse(stdout);
 }
 
-export async function parsePHPStanConfig(
+export async function parsePHPStanConfigFile(
   path: string,
-  settings: PHPStanSettings,
-  resolve = true
+  env: PHPStanConfigEnv
 ): Promise<PHPStanConfig> {
-  const config = await parseYamlFile<PHPStanConfig>(path);
-  return resolve ? resolvePHPStanConfig(config, settings) : config;
+  const config = await parseNeonFile<PHPStanConfig>(path, env);
+  return normalizePHPStanConfig(config, env.currentWorkingDirectory);
 }
 
 export async function findPHPStanConfigPath(
-  settings: PHPStanSettings
+  cwd: string
 ): Promise<string | undefined> {
-  const dir = settings.cwd;
   const baseNames = ["phpstan.neon", "phpstan.neon.dist"];
   for (const basename of baseNames) {
-    const path = join(dir, basename);
+    const path = join(cwd, basename);
     if (await checkFile(path)) {
       return path;
     }
   }
 }
 
-export function resolvePHPStanConfig(
+export function normalizePHPStanConfig(
   config: PHPStanConfig,
-  settings: PHPStanSettings
+  cwd: string
 ): PHPStanConfig {
   config = Object.assign({}, config);
   config.parameters = Object.assign({}, config.parameters);
   const params = config.parameters;
-  if (Array.isArray(params.paths))
-    params.paths = params.paths.map((v) => resolveConfigItemPath(v, settings));
-  if (Array.isArray(params.excludes_analyse))
-    params.excludes_analyse = params.excludes_analyse.map((v) =>
-      resolveConfigItemPath(v, settings)
-    );
+  const resolve = (v: string) => resolvePath(v, cwd);
+
+  params.paths = params.paths?.map(resolve);
+  params.excludes_analyse = params.excludes_analyse?.map(resolve);
+  params.bootstrapFiles = params.bootstrapFiles?.map(resolve);
 
   return config;
 }

@@ -25,7 +25,7 @@ export default defineConfig({
       ],
       output: {
         manualChunks: {
-          vendor: ["yaml"],
+          vendor: ["js-yaml"],
         },
       },
     },

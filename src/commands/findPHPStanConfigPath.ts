@@ -8,10 +8,7 @@ export default async function findPHPStanConfigPath(ext: Ext) {
     ? isAbsolute(settings.configPath)
       ? settings.configPath
       : join(rootPath, settings.configPath)
-    : await find({
-        cwd: ext.cwd,
-        binPath: ext.settings.path,
-      });
+    : await find(ext.cwd);
 
   if (!configPath) throw new Error(`Config path not found.`);
   outputChannel.appendLine(`# Config path: ${configPath}`);

@@ -143,12 +143,13 @@
     "workspaceContains:**/phpstan.neon.dist"
   ],
   "dependencies": {
-    "yaml": "^2.1.1"
+    "js-yaml": "^4.1.0"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.6",
     "@changesets/cli": "^2.24.4",
     "@trivago/prettier-plugin-sort-imports": "^3.3.0",
+    "@types/js-yaml": "^4.0.5",
     "@types/node": "^18.7.18",
     "@types/vscode": "^1.50.0",
     "@typescript-eslint/eslint-plugin": "^5.37.0",
