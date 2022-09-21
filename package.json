@@ -122,6 +122,11 @@
           "type": "integer",
           "description": "Milliseconds delay between file changes before run analyse",
           "default": 200
+        },
+        "phpstan.initialAnalysis": {
+          "type": "boolean",
+          "description": "Runs the analyse command on startup",
+          "default": true
         }
       }
     },

@@ -33,6 +33,7 @@ export type ExtSettings = {
   configFileWatcher: boolean;
   analysedDelay: number;
   memoryLimit: string;
+  initialAnalysis: boolean;
 };
 
 export type ExtStore = {
@@ -66,6 +67,7 @@ export class Ext<
   readonly statusBarItem: StatusBarItem;
   readonly commandListeners: Disposable[] = [];
   protected fileWatchers = createFileWatcherManager();
+  protected activations = 0;
 
   constructor(
     readonly options: {
@@ -150,6 +152,7 @@ export class Ext<
       configFileWatcher: get("configFileWatcher"),
       analysedDelay: get("analysedDelay"),
       memoryLimit: get("memoryLimit"),
+      initialAnalysis: get("initialAnalysis"),
     };
   }
 
@@ -183,10 +186,11 @@ export class Ext<
   }
 
   async activate() {
+    this.activations++;
     await this.call(async () => await this.activateRutine(), "activate");
   }
 
-  protected async activateRutine(analyse = true) {
+  protected async activateRutine() {
     cmd.executeCommand(
       "setContext",
       `${this.options.name}:enabled`,
@@ -229,7 +233,8 @@ export class Ext<
       });
     }
 
-    if (analyse) this.options.commands.analyse(this);
+    if (this.settings.initialAnalysis || this.activations > 1)
+      this.options.commands.analyse(this);
   }
 
   deactivate() {
