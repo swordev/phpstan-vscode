@@ -41,7 +41,7 @@ To contribute to the project, follow these steps:
 
 1. Fork this repository.
 2. Create a branch: `git checkout -b <branch_name>`.
-3. Make your changes and check them: `pnpm run prepare`.
+3. Make your changes and check them: `pnpm changeset`.
 4. Commit your changes: `git commit -m '<commit_message>'`.
 5. Push to the original branch: `git push origin <branch_name>`.
 6. Create the pull request.
