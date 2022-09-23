@@ -1,8 +1,10 @@
 # phpstan-vscode
 
-![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/swordev.phpstan)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/swordev/phpstan-vscode/CI)
-![Visual Studio Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/swordev.phpstan)
+[![version]](https://marketplace.visualstudio.com/items?itemName=swordev.phpstan) [![ci]](https://github.com/swordev/phpstan-vscode/actions/workflows/ci.yml) [![downloads]](https://marketplace.visualstudio.com/items?itemName=swordev.phpstan)
+
+[ci]: https://img.shields.io/github/workflow/status/swordev/phpstan-vscode/CI?label=CI
+[version]: https://img.shields.io/visual-studio-marketplace/v/swordev.phpstan?logo=
+[downloads]: https://img.shields.io/visual-studio-marketplace/d/swordev.phpstan
 
 [PHPStan](https://phpstan.org) extension for VSCode.
 
@@ -10,15 +12,15 @@
 
 ## Features
 
-- Activates the extension if it detects `phpstan.neon`/`phpstan.neon.dist` file on the project root dir.
 - Runs PHPStan analyse on every PHP file change.
 - Shows all PHPStan problems of the whole project.
-- Parses PHPStan config for file watching.
+- Parses the PHPStan config file for configuring the extension.
 - Commands:
   - `phpstan.showOutput`: show output.
   - `phpstan.analyse`: analyse.
   - `phpstan.analyseCurrentPath`: analyse current path.
     - Also available in the explorer context menu.
+  - `phpstan.stopAnalyse`: stop analyse.
   - `phpstan.pauseFileWatcher`: pause file watcher.
   - `phpstan.resumeFileWatcher`: resume file watcher.
   - `phpstan.toggleFileWatcher`: toggle file watcher.
