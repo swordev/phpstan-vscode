@@ -50,7 +50,7 @@ jobs:
             const metadata = require('./.github/workflows/metadata.js')
             await metadata({ github, context, core })
       - name: Publish VSCode extension
-        if: steps.metadata.outputs['publish'] == 'true'
+        if: steps.metadata.outputs['publish'] == 'true' && steps.changesets.outputs.hasChangesets == 'false'
         run: npx vsce publish --packagePath $(find . -iname *.vsix)
         env:
           VSCE_PAT: ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
