@@ -211,7 +211,7 @@ export class Ext<
             tag: `event:${eventName}`,
             message: path,
           });
-          this.store.reactivate.timeout(() => this.reactivate());
+          this.store.reactivate.timeout.run(() => this.reactivate());
         }
       );
 

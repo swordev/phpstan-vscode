@@ -1,9 +1,31 @@
-export type DelayedTimeout = (cb: () => unknown, ms?: number) => void;
+export type DelayedTimeout = {
+  readonly running: boolean;
+  readonly pending: boolean;
+  run: (cb: () => unknown, ms?: number) => void;
+};
 
 export function createDelayedTimeout(defaultsMs?: number) {
   let timeout: NodeJS.Timeout | undefined;
-  return (cb: () => unknown, ms = defaultsMs) => {
-    if (timeout) clearTimeout(timeout);
-    timeout = setTimeout(cb, ms);
+  let running = false;
+  let pending = false;
+  return {
+    get pending() {
+      return pending;
+    },
+    get running() {
+      return running;
+    },
+    run: (cb: () => unknown, ms = defaultsMs) => {
+      pending = true;
+      if (timeout) clearTimeout(timeout);
+      timeout = setTimeout(async () => {
+        running = true;
+        try {
+          await cb();
+        } finally {
+          running = pending = false;
+        }
+      }, ms);
+    },
   };
 }

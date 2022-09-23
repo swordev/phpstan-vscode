@@ -110,7 +110,7 @@ async function rutine(ext: Ext, args?: string[]) {
 
 export default async function analyse(ext: Ext, ms?: number, args?: string[]) {
   await stopAnalyse(ext);
-  ext.store.analyse.timeout(async () => {
+  ext.store.analyse.timeout.run(async () => {
     await rutine(ext, args);
   }, ms ?? ext.settings.analysedDelay);
 }
