@@ -1,4 +1,4 @@
-## [1.4.6](https://github.com/swordev/phpstan-vscode/compare/v1.4.5...v1.4.6) (2022-03-25)
+# phpstan-vscode
 
 ## 2.0.0
 
@@ -19,6 +19,8 @@
 ### Patch Changes
 
 - [`bc7f2cc`](https://github.com/swordev/phpstan-vscode/commit/bc7f2ccbaff312badba00cb07c96bb62942fba9d) Thanks [@juanrgm](https://github.com/juanrgm)! - Stop the process successful
+
+## [1.4.6](https://github.com/swordev/phpstan-vscode/compare/v1.4.5...v1.4.6) (2022-03-25)
 
 ## [1.4.5](https://github.com/swordev/phpstan-vscode/compare/v1.4.4...v1.4.5) (2022-03-25)
 
