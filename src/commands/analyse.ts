@@ -3,7 +3,7 @@ import {
   parsePHPStanAnalyseResult,
   PHPStanAnalyseResult,
 } from "../utils/phpstan";
-import { waitForClose } from "../utils/process";
+import { killProcess, waitForClose } from "../utils/process";
 import showOutput from "./showOutput";
 import stopAnalyse from "./stopAnalyse";
 import { spawn } from "child_process";
@@ -68,7 +68,7 @@ async function refreshDiagnostics(ext: Ext, result: PHPStanAnalyseResult) {
 async function rutine(ext: Ext, args?: string[]) {
   setStatusBarProgress(ext);
 
-  const childProcess = (ext.store.analyse.process = spawn(
+  const childProcess = spawn(
     ext.settings.phpPath,
     [
       "-f",
@@ -87,29 +87,55 @@ async function rutine(ext: Ext, args?: string[]) {
     {
       cwd: ext.cwd,
     }
-  ));
+  );
 
-  childProcess.stdout.on("data", (buffer: Buffer) => ext.log(buffer));
+  let stdout = "";
+  let skipCloseError = false;
+  const { channel } = ext.store.analyse;
 
-  childProcess.stderr.on("data", (buffer: Buffer) => {
-    const progress = /(\d{1,3})%\s*$/.exec(buffer.toString())?.[1];
-    if (progress) setStatusBarProgress(ext, Number(progress));
-    ext.log(buffer);
+  channel.once("stop", async () => {
+    skipCloseError = true;
+    try {
+      const killed = await killProcess(childProcess);
+      ext.log({
+        tag: "call",
+        message: `killProcess (${killed ? "true" : "false"})`,
+      });
+    } catch (error) {
+      ext.log(error as Error);
+    }
   });
 
-  const [, stdout] = await waitForClose(childProcess);
+  try {
+    childProcess.stdout.on("data", (buffer: Buffer) => {
+      stdout += buffer.toString();
+      ext.log(buffer);
+    });
+    childProcess.stderr.on("data", (buffer: Buffer) => {
+      const progress = /(\d{1,3})%\s*$/.exec(buffer.toString())?.[1];
+      if (progress) setStatusBarProgress(ext, Number(progress));
+      ext.log(buffer);
+    });
+    try {
+      await waitForClose(childProcess);
+    } catch (error) {
+      if (skipCloseError) return;
+      throw error;
+    }
+  } finally {
+    channel.removeAllListeners();
+  }
 
-  ext.store.analyse.process = undefined;
-
-  const phpstanResult = parsePHPStanAnalyseResult(stdout);
-
-  refreshDiagnostics(ext, phpstanResult);
+  if (stdout) {
+    const phpstanResult = parsePHPStanAnalyseResult(stdout);
+    refreshDiagnostics(ext, phpstanResult);
+  }
 
   ext.clearStatusBar();
 }
 
 export default async function analyse(ext: Ext, ms?: number, args?: string[]) {
-  await stopAnalyse(ext);
+  stopAnalyse(ext);
   ext.store.analyse.timeout.run(async () => {
     await rutine(ext, args);
   }, ms ?? ext.settings.analysedDelay);

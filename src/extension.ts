@@ -9,7 +9,7 @@ import {
   getWorkspacePath,
   onChangeExtensionSettings,
 } from "./utils/vscode";
-import { ChildProcessWithoutNullStreams } from "child_process";
+import { EventEmitter } from "events";
 import {
   DiagnosticCollection,
   Disposable,
@@ -44,7 +44,7 @@ export type ExtStore = {
     timeout: DelayedTimeout;
   };
   analyse: {
-    process?: ChildProcessWithoutNullStreams;
+    channel: EventEmitter;
     timeout: DelayedTimeout;
   };
   fileWatcher: {
@@ -92,6 +92,7 @@ export class Ext<
       },
       analyse: {
         timeout: createDelayedTimeout(),
+        channel: new EventEmitter(),
       },
       fileWatcher: {
         enabled: true,
@@ -227,7 +228,10 @@ export class Ext<
               tag: `event:${eventName}`,
               message: path,
             });
-            return await this.options.commands.analyse(this);
+            await this.call(
+              async () => await this.options.commands.analyse(this),
+              "analyse"
+            );
           }
         }
       });
