@@ -36,8 +36,7 @@ jobs:
         with:
           commit: "chore: update versions"
           title: Update versions
-          publish: echo "Requires publishing"
-          #publish: npx changeset publish
+          publish: npx changeset publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -52,7 +51,6 @@ jobs:
             await metadata({ github, context, core })
       - name: Publish VSCode extension
         if: steps.metadata.outputs['publish'] == 'true'
-        run: echo "Requires publishing"
-        #run: npx vsce publish -- -p $VSCODE_MARKETPLACE_TOKEN
+        run: npx vsce publish -- -p $VSCODE_MARKETPLACE_TOKEN
         env:
           VSCODE_MARKETPLACE_TOKEN: ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
