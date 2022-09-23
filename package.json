@@ -174,5 +174,8 @@
   "engines": {
     "vscode": "^1.71.0"
   },
-  "icon": "assets/logo.png"
+  "icon": "assets/logo.png",
+  "sponsor": {
+    "url": "https://github.com/sponsors/juanrgm"
+  }
 }
