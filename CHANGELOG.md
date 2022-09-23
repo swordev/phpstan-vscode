@@ -1,5 +1,11 @@
 # phpstan-vscode
 
+## 2.0.1
+
+### Patch Changes
+
+- [`6859b56`](https://github.com/swordev/phpstan-vscode/commit/6859b560068f281f41ba5cb549abfaef3310fd7a) Thanks [@juanrgm](https://github.com/juanrgm)! - Update the readme file
+
 ## 2.0.0
 
 ### Major Changes
