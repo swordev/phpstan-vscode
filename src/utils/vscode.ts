@@ -1,4 +1,6 @@
 import { sanitizeFsPath } from "./path";
+import { readdir } from "fs/promises";
+import { setTimeout } from "timers/promises";
 import {
   Disposable,
   FileSystemWatcher,
@@ -86,4 +88,28 @@ export function createFileWatcherManager() {
       fileWatchers = [];
     },
   };
+}
+
+export async function isWorkspaceReady(path: string) {
+  const nodeHaveFiles = !!(await readdir(path));
+  if (!nodeHaveFiles) return true;
+  const vscodeHaveFiles = !!(await workspace.findFiles("*", undefined, 1));
+  return vscodeHaveFiles ? true : false;
+}
+
+export async function waitForWorkspaceReady(
+  path: string,
+  options: {
+    tries?: number;
+    tryTimeout?: number;
+    onTry?: (value: number) => void;
+  } = {}
+) {
+  const tries = Math.max(0, options.tries || 0);
+  for (let value = 1; !tries || value <= tries; ++value) {
+    options.onTry?.(value);
+    if (await isWorkspaceReady(path)) return;
+    if (options.tryTimeout) await setTimeout(options.tryTimeout);
+  }
+  throw new Error(`Workspace is not ready`);
 }
