@@ -40,7 +40,7 @@ export type ExtStore = {
   phpstan: {
     configPath?: string;
   };
-  reactivate: {
+  activate: {
     timeout: DelayedTimeout;
   };
   analyse: {
@@ -87,7 +87,7 @@ export class Ext<
     });
     this.store = {
       phpstan: {},
-      reactivate: {
+      activate: {
         timeout: createDelayedTimeout(500),
       },
       analyse: {
@@ -212,7 +212,7 @@ export class Ext<
             tag: `event:${eventName}`,
             message: path,
           });
-          this.store.reactivate.timeout.run(() => this.reactivate());
+          this.store.activate.timeout.run(() => this.reactivate());
         }
       );
 
