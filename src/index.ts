@@ -21,7 +21,7 @@ export function activate(): void {
       });
     },
   })
-    .then(() => ext?.activate())
+    .finally(() => ext?.activate())
     .catch((error) => ext?.log(error));
 }
 
