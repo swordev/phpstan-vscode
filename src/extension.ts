@@ -188,10 +188,10 @@ export class Ext<
 
   async activate() {
     this.activations++;
-    await this.call(async () => await this.activateRutine(), "activate");
+    await this.call(async () => await this.runActivate(), "activate");
   }
 
-  protected async activateRutine() {
+  protected async runActivate() {
     cmd.executeCommand(
       "setContext",
       `${this.options.name}:enabled`,

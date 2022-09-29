@@ -65,7 +65,7 @@ async function refreshDiagnostics(ext: Ext, result: PHPStanAnalyseResult) {
   }
 }
 
-async function rutine(ext: Ext, args?: string[]) {
+async function runAnalyse(ext: Ext, args?: string[]) {
   setStatusBarProgress(ext);
 
   const childProcess = spawn(
@@ -137,6 +137,6 @@ async function rutine(ext: Ext, args?: string[]) {
 export default async function analyse(ext: Ext, ms?: number, args?: string[]) {
   stopAnalyse(ext);
   ext.store.analyse.timeout.run(async () => {
-    await rutine(ext, args);
+    await runAnalyse(ext, args);
   }, ms ?? ext.settings.analysedDelay);
 }
