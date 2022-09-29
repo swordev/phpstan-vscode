@@ -1,5 +1,11 @@
 # phpstan-vscode
 
+## 2.0.2
+
+### Patch Changes
+
+- [`233f4fa`](https://github.com/swordev/phpstan-vscode/commit/233f4fa46d6e3ad96a47437455c30db0a962ef78) Thanks [@juanrgm](https://github.com/juanrgm)! - Wait for workspace to be ready
+
 ## 2.0.1
 
 ### Patch Changes
