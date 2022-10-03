@@ -13,6 +13,9 @@ export async function killProcess(p: ChildProcess) {
 export async function waitForClose(childProcess: ChildProcess) {
   return new Promise<number | null>((resolve, reject) => {
     childProcess.on("error", reject);
+    childProcess.on("exit", (exitCode) => {
+      if (childProcess.killed) resolve(exitCode);
+    });
     childProcess.on("close", (exitCode) => resolve(exitCode));
   });
 }
