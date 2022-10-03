@@ -157,10 +157,28 @@ export class Ext<
     };
   }
 
+  setStatusBar(data: {
+    text: string;
+    tooltip?: string;
+    command?: string | ((ext: Ext) => void);
+  }) {
+    this.statusBarItem.text = data.text;
+    this.statusBarItem.tooltip =
+      typeof data.tooltip === "string" ? data.tooltip : undefined;
+    if (typeof data.command === "string") {
+      this.statusBarItem.command = data.command;
+    } else if (typeof data.command === "function") {
+      this.statusBarItem.command = this.getCommandName(data.command);
+    } else {
+      this.statusBarItem.command = undefined;
+    }
+    this.statusBarItem.show();
+  }
+
   clearStatusBar() {
     this.statusBarItem.text = "";
-    delete this.statusBarItem.tooltip;
-    delete this.statusBarItem.command;
+    this.statusBarItem.tooltip = undefined;
+    this.statusBarItem.command = undefined;
     this.statusBarItem.hide();
   }
 

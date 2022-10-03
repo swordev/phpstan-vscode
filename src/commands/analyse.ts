@@ -10,14 +10,10 @@ import { spawn } from "child_process";
 import { Diagnostic, DiagnosticSeverity, Range, Uri } from "vscode";
 
 function setStatusBarProgress(ext: Ext, progress?: number) {
-  const { statusBarItem } = ext;
   let text = "$(sync~spin) PHPStan analysing...";
   if (!!progress && progress > 0) text += ` (${progress}%)`;
 
-  statusBarItem.text = text;
-  statusBarItem.tooltip = "";
-  statusBarItem.command = ext.getCommandName(showOutput);
-  statusBarItem.show();
+  ext.setStatusBar({ text, command: showOutput });
 }
 
 async function refreshDiagnostics(ext: Ext, result: PHPStanAnalyseResult) {

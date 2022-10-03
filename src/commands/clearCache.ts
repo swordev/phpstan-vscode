@@ -4,12 +4,12 @@ import showOutput from "./showOutput";
 import { spawn } from "child_process";
 
 export async function clearCache(ext: Ext) {
-  const { statusBarItem, settings } = ext;
+  const { settings } = ext;
 
-  statusBarItem.text = "$(sync~spin) PHPStan clearing cache...";
-  statusBarItem.tooltip = "";
-  statusBarItem.command = ext.getCommandName(showOutput);
-  statusBarItem.show();
+  ext.setStatusBar({
+    text: "$(sync~spin) PHPStan clearing cache...",
+    command: showOutput,
+  });
 
   const childProcess = spawn(
     settings.phpPath,
