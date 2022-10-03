@@ -115,7 +115,10 @@ async function runAnalyse(ext: Ext, args?: string[]) {
     try {
       await waitForClose(childProcess);
     } catch (error) {
-      if (skipCloseError) return;
+      if (skipCloseError) {
+        ext.clearStatusBar();
+        return;
+      }
       throw error;
     }
   } finally {

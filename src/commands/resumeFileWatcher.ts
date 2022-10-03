@@ -1,7 +1,13 @@
 import { Ext } from "../extension";
 import analyse from "./analyse";
 
-export default function resumeFileWatcher(ext: Ext) {
+export default async function resumeFileWatcher(ext: Ext) {
+  ext.setStatusBar({
+    text: "$(debug-pause) PHPStan",
+    tooltip: "Resume file watcher",
+    command: resumeFileWatcher,
+  });
+  ext.store.fileWatcher.statusBarFixed = undefined;
   ext.store.fileWatcher.enabled = true;
-  analyse(ext, 0);
+  await analyse(ext, 0);
 }

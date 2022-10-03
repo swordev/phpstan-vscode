@@ -34,4 +34,6 @@ export async function clearCache(ext: Ext) {
   });
 
   await waitForClose(childProcess);
+
+  ext.clearStatusBar();
 }

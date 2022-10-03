@@ -49,7 +49,14 @@ export type ExtStore = {
   };
   fileWatcher: {
     enabled: boolean;
+    statusBarFixed?: StatusBarData | undefined;
   };
+};
+
+export type StatusBarData = {
+  text: string;
+  tooltip?: string;
+  command?: string | ((ext: Ext) => void);
 };
 
 export class Ext<
@@ -157,11 +164,7 @@ export class Ext<
     };
   }
 
-  setStatusBar(data: {
-    text: string;
-    tooltip?: string;
-    command?: string | ((ext: Ext) => void);
-  }) {
+  setStatusBar(data: StatusBarData) {
     this.statusBarItem.text = data.text;
     this.statusBarItem.tooltip =
       typeof data.tooltip === "string" ? data.tooltip : undefined;
@@ -176,10 +179,14 @@ export class Ext<
   }
 
   clearStatusBar() {
-    this.statusBarItem.text = "";
-    this.statusBarItem.tooltip = undefined;
-    this.statusBarItem.command = undefined;
-    this.statusBarItem.hide();
+    if (this.store.fileWatcher.statusBarFixed) {
+      this.setStatusBar(this.store.fileWatcher.statusBarFixed);
+    } else {
+      this.statusBarItem.text = "";
+      this.statusBarItem.tooltip = undefined;
+      this.statusBarItem.command = undefined;
+      this.statusBarItem.hide();
+    }
   }
 
   setStatusBarError(error: unknown, source: string) {
