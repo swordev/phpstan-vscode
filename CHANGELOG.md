@@ -1,5 +1,13 @@
 # phpstan-vscode
 
+## 2.0.3
+
+### Patch Changes
+
+- [`a39a0f4`](https://github.com/swordev/phpstan-vscode/commit/a39a0f490313322e621555c6b3423f80b1725446) Thanks [@juanrgm](https://github.com/juanrgm)! - Fix memory leak when the process is killed
+
+- [`39e35c8`](https://github.com/swordev/phpstan-vscode/commit/39e35c8c4948d2c0ff8166298ce5a74281de6e06) Thanks [@juanrgm](https://github.com/juanrgm)! - Fix status bar on `clearCache` and `pauseFileWatcher` commands
+
 ## 2.0.2
 
 ### Patch Changes
