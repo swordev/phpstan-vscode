@@ -1,6 +1,7 @@
 import { Ext } from "../extension";
 import {
   parsePHPStanAnalyseResult,
+  PHPStanAnalyseMessageItem,
   PHPStanAnalyseResult,
 } from "../utils/phpstan";
 import { killProcess, waitForClose } from "../utils/process";
@@ -14,6 +15,12 @@ function setStatusBarProgress(ext: Ext, progress?: number) {
   if (!!progress && progress > 0) text += ` (${progress}%)`;
 
   ext.setStatusBar({ text, command: showOutput });
+}
+
+function handleDiagnosticMessage(messageItem: PHPStanAnalyseMessageItem) {
+  return messageItem.tip
+    ? messageItem.message + "\n💡 " + messageItem.tip
+    : messageItem.message;
 }
 
 async function refreshDiagnostics(ext: Ext, result: PHPStanAnalyseResult) {
@@ -46,7 +53,7 @@ async function refreshDiagnostics(ext: Ext, result: PHPStanAnalyseResult) {
       const range = new Range(line, 0, line, 0);
       const diagnostic = new Diagnostic(
         range,
-        messageItem.message,
+        handleDiagnosticMessage(messageItem),
         DiagnosticSeverity.Error
       );
 

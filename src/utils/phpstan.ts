@@ -9,14 +9,17 @@ export type PHPStanAnalyseResult = {
   files: {
     [path: string]: {
       errors: number;
-      messages: {
-        message: string;
-        line: number | null;
-        ignorable: boolean;
-      }[];
+      messages: PHPStanAnalyseMessageItem[];
     };
   };
   errors: string[];
+};
+
+export type PHPStanAnalyseMessageItem = {
+  message: string;
+  line: number | null;
+  ignorable: boolean;
+  tip?: string;
 };
 
 export type PHPStanConfig = {
