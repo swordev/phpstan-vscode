@@ -1,5 +1,5 @@
+import { normalize } from "path";
 import { parseNeonFile } from "./neon";
-import { resolvePath } from "./path";
 
 export type PHPStanAnalyseResult = {
   totals: {
@@ -29,7 +29,6 @@ export type PHPStanConfig = {
 };
 
 export type PHPStanConfigEnv = {
-  rootDir: string;
   currentWorkingDirectory: string;
 };
 
@@ -44,21 +43,19 @@ export async function parsePHPStanConfigFile(
   env: PHPStanConfigEnv
 ): Promise<PHPStanConfig> {
   const config = await parseNeonFile<PHPStanConfig>(path, env);
-  return normalizePHPStanConfig(config, env.currentWorkingDirectory);
+  return normalizePHPStanConfig(config);
 }
 
 export function normalizePHPStanConfig(
   config: PHPStanConfig,
-  cwd: string
 ): PHPStanConfig {
   config = Object.assign({}, config);
   config.parameters = Object.assign({}, config.parameters);
   const params = config.parameters;
-  const resolve = (v: string) => resolvePath(v, cwd);
 
-  params.paths = params.paths?.map(resolve);
-  params.excludes_analyse = params.excludes_analyse?.map(resolve);
-  params.bootstrapFiles = params.bootstrapFiles?.map(resolve);
+  params.paths = params.paths?.map(normalize);
+  params.excludes_analyse = params.excludes_analyse?.map(normalize);
+  params.bootstrapFiles = params.bootstrapFiles?.map(normalize);
 
   return config;
 }

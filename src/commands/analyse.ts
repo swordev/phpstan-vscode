@@ -1,3 +1,4 @@
+import { normalize, resolve } from "path";
 import { Ext } from "../extension";
 import {
   parsePHPStanAnalyseResult,
@@ -8,6 +9,7 @@ import showOutput from "./showOutput";
 import stopAnalyse from "./stopAnalyse";
 import { spawn } from "child_process";
 import { Diagnostic, DiagnosticSeverity, Range, Uri } from "vscode";
+import { getFileLines } from "../utils/fs";
 
 function setStatusBarProgress(ext: Ext, progress?: number) {
   let text = "$(sync~spin) PHPStan analysing...";
@@ -25,6 +27,7 @@ async function refreshDiagnostics(ext: Ext, result: PHPStanAnalyseResult) {
   for (const error of result.errors) {
     const range = new Range(0, 0, 0, 0);
     const diagnostic = new Diagnostic(range, error, DiagnosticSeverity.Error);
+    diagnostic.source = ext.options.name;
     globalDiagnostics.push(diagnostic);
   }
 
@@ -38,26 +41,62 @@ async function refreshDiagnostics(ext: Ext, result: PHPStanAnalyseResult) {
   // https://github.com/phpstan/phpstan-src/blob/6d228a53/src/Analyser/MutatingScope.php#L289
   const contextRegex = / \(in context of .+\)$/;
 
-  for (let path in result.files) {
+  const pathMaps: {
+    src: string,
+    dest: string,
+  }[] = [];
+
+  ext.settings.pathMappings.split(',').map(mapping => {
+    const parts = mapping.split(':').map(p => p.trim()).map(p => p.length > 0 ? p : '.').map(normalize);
+    if (parts.length === 2 && parts[0] && parts[1]) {
+      pathMaps.push({
+        src: parts[0] + '/',
+        dest: parts[1] + '/',
+      });
+    }
+  });
+
+  ext.log('Using path mappings: ' + JSON.stringify(pathMaps));
+
+  for (const path in result.files) {
+    let realPath = path;
+
+    const matches = contextRegex.exec(realPath);
+
+    if (matches) realPath = realPath.slice(0, matches.index);
+
+    realPath = normalize(realPath);
+
+    for (const pathMap of pathMaps) {
+      if (realPath.startsWith(pathMap.src)) {
+        realPath = resolve(ext.cwd, pathMap.dest + realPath.substring(pathMap.src.length));
+        break;
+      }
+    }
+
+    const fileLines: string[] = await getFileLines(resolve(realPath));
+
     const pathItem = result.files[path];
     const diagnostics: Diagnostic[] = [];
     for (const messageItem of pathItem.messages) {
       const line = messageItem.line ? messageItem.line - 1 : 0;
-      const range = new Range(line, 0, line, 0);
+      const lineText = messageItem.line ? (fileLines[line] ?? '') : '';
+
+      const startCol = Math.max(0, lineText.search(/[^\s]/g));
+      const endCol = Math.max(0, lineText.search(/\s*$/g));
+
+      const range = new Range(line, startCol, line, endCol);
       const diagnostic = new Diagnostic(
         range,
         messageItem.message,
         DiagnosticSeverity.Error
       );
+      diagnostic.source = ext.options.name;
 
       diagnostics.push(diagnostic);
     }
 
-    const matches = contextRegex.exec(path);
-
-    if (matches) path = path.slice(0, matches.index);
-
-    diagnostic.set(Uri.file(path), diagnostics);
+    diagnostic.set(Uri.file(realPath), diagnostics);
   }
 }
 

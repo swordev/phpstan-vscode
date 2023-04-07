@@ -118,6 +118,11 @@
           "description": "PHPStan config path",
           "default": "{phpstan.neon,phpstan.neon.dist}"
         },
+        "phpstan.pathMappings": {
+          "type": "string",
+          "description": "Mappings for paths in PHPStan results, comma separated",
+          "default": "/srv/app:."
+        },
         "phpstan.analysedDelay": {
           "type": "integer",
           "description": "Milliseconds delay between file changes before run analyse",

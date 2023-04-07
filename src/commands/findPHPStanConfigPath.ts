@@ -1,3 +1,4 @@
+import { relative } from "path";
 import { Ext } from "../extension";
 import { RelativePattern, workspace } from "vscode";
 
@@ -9,7 +10,7 @@ export default async function findPHPStanConfigPath(ext: Ext) {
     1
   );
   if (!configUri) throw new Error(`Config path not found.`);
-  const configPath = configUri.fsPath;
+  const configPath = relative(ext.cwd, configUri.path);
   ext.log({ tag: "configPath", message: configPath });
   return configPath;
 }

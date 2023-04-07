@@ -1,3 +1,4 @@
+import { normalize, resolve } from "path";
 import findPHPStanConfigPath from "./commands/findPHPStanConfigPath";
 import loadPHPStanConfig from "./commands/loadPHPStanConfig";
 import { createDelayedTimeout, DelayedTimeout } from "./utils/async";
@@ -34,6 +35,7 @@ export type ExtSettings = {
   analysedDelay: number;
   memoryLimit: string;
   initialAnalysis: boolean;
+  pathMappings: string;
 };
 
 export type ExtStore = {
@@ -161,6 +163,7 @@ export class Ext<
       analysedDelay: get("analysedDelay"),
       memoryLimit: get("memoryLimit"),
       initialAnalysis: get("initialAnalysis"),
+      pathMappings: get("pathMappings"),
     };
   }
 
@@ -229,7 +232,7 @@ export class Ext<
 
     if (this.settings.configFileWatcher)
       this.fileWatchers.register(
-        new RelativePattern(getWorkspacePath(), this.settings.configPath),
+        new RelativePattern(this.cwd, this.settings.configPath),
         (uri, eventName) => {
           if (!this.store.fileWatcher.enabled) return;
           const path = sanitizeFsPath(uri.fsPath);
@@ -246,8 +249,11 @@ export class Ext<
       const extensions = config.parameters?.fileExtensions ?? ["php"];
       this.fileWatchers.register({ extensions }, async (uri, eventName) => {
         if (!this.store.fileWatcher.enabled) return;
-        for (const patternPath of config.parameters?.paths || []) {
-          const path = sanitizeFsPath(uri.fsPath);
+        for (let patternPath of config.parameters?.paths || []) {
+          patternPath = resolve(this.cwd, patternPath);
+
+          const path = normalize(uri.fsPath);
+
           if (path.startsWith(patternPath)) {
             this.log({
               tag: `event:${eventName}`,
